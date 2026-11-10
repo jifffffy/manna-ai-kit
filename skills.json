@@ -1,0 +1,82 @@
+{
+  "version": "0.1.0",
+  "skills": [
+    {
+      "name": "manna-router",
+      "version": "0.1.0",
+      "mode": "suggest",
+      "path": "skills/manna-router",
+      "description": "Route a requirement to the right manna skill or workflow before any change."
+    },
+    {
+      "name": "manna-discovery",
+      "version": "0.1.0",
+      "mode": "suggest",
+      "path": "skills/manna-discovery",
+      "description": "Turn a domain and requirement into a testable capability spec."
+    },
+    {
+      "name": "manna-agent",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/manna-agent",
+      "description": "Design and generate Embabel agents, actions and goals."
+    },
+    {
+      "name": "manna-tools",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/manna-tools",
+      "description": "Design tool contracts with explicit side effects, permissions and idempotency."
+    },
+    {
+      "name": "manna-domain",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/manna-domain",
+      "description": "Derive and consolidate domain entities, relations and invariants from agent and tool needs."
+    },
+    {
+      "name": "manna-graph",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/manna-graph",
+      "description": "Design Neo4j labels, relationships, constraints, queries and migrations for a capability slice."
+    },
+    {
+      "name": "manna-memory",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/manna-memory",
+      "description": "Design DICE proposition schemas, relation projections and recall policies."
+    },
+    {
+      "name": "manna-pipeline",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/manna-pipeline",
+      "description": "Design file-based ingest, enrichment and human review pipelines without an admin UI."
+    },
+    {
+      "name": "manna-transport",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/manna-transport",
+      "description": "Expose capabilities through REST, SSE, CLI or MCP without adding a UI."
+    },
+    {
+      "name": "manna-evals",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/manna-evals",
+      "description": "Create layered contract, integration and behavior evals for generated capabilities."
+    },
+    {
+      "name": "manna-release",
+      "version": "0.1.0",
+      "mode": "suggest",
+      "path": "skills/manna-release",
+      "description": "Version, lock, verify and package a manna-generated project."
+    }
+  ]
+}

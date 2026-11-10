@@ -1,0 +1,52 @@
+{
+  "name": "manna-ai-kit",
+  "version": "0.1.0",
+  "description": "Domain-anchored, agent-delivered, spec-driven project generator and evolution kit for headless Embabel services.",
+  "type": "module",
+  "bin": {
+    "manna": "generator/manna.mjs"
+  },
+  "scripts": {
+    "validate": "node scripts/dev/validate-kit.mjs",
+    "lock": "node scripts/dev/update-lock.mjs",
+    "lock:check": "node scripts/dev/update-lock.mjs --check",
+    "test": "node scripts/dev/test-generator.mjs",
+    "test:compile": "node scripts/dev/test-generated-compile.mjs"
+  },
+  "files": [
+    "AGENTS.md",
+    "README.md",
+    "NOTICE",
+    "LICENSE",
+    "skills.json",
+    "skills.lock",
+    ".well-known/",
+    ".claude-plugin/",
+    "skills/",
+    "shared/",
+    "workflows/",
+    "policies/",
+    "templates/",
+    "generator/",
+    "examples/",
+    "docs/"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/embabel/manna-ai-kit"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "embabel",
+    "agent",
+    "tools",
+    "mcp",
+    "neo4j",
+    "dice",
+    "ai-kit",
+    "codegen"
+  ]
+}

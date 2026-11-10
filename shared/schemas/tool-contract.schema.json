@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://manna.dev/schemas/tool-contract.schema.json",
+  "title": "Manna Tool Contract",
+  "type": "object",
+  "required": ["name", "description", "kind", "side_effects", "idempotent", "approval"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z][A-Za-z0-9]*$" },
+    "description": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["internal", "http", "mcp", "db", "filesystem"] },
+    "side_effects": { "enum": ["none", "read", "internal-write", "external-write", "destructive"] },
+    "idempotent": { "type": "boolean" },
+    "idempotency_key": { "type": "string" },
+    "approval": { "enum": ["none", "required", "explicit"] },
+    "dry_run": { "type": "boolean", "default": false },
+    "timeout_seconds": { "type": "integer", "minimum": 1, "maximum": 300, "default": 30 },
+    "secrets": { "type": "array", "items": { "type": "string" } },
+    "input": {
+      "type": "object",
+      "description": "JSON Schema for tool input.",
+      "additionalProperties": true
+    },
+    "output": {
+      "type": "object",
+      "description": "JSON Schema for tool output.",
+      "additionalProperties": true
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "side_effects": { "const": "external-write" } } },
+      "then": {
+        "anyOf": [
+          { "required": ["idempotency_key"] },
+          { "properties": { "dry_run": { "const": true } }, "required": ["dry_run"] }
+        ]
+      }
+    },
+    {
+      "if": { "properties": { "side_effects": { "const": "destructive" } } },
+      "then": { "properties": { "approval": { "const": "explicit" } } }
+    }
+  ]
+}

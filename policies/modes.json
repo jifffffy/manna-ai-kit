@@ -1,0 +1,48 @@
+{
+  "version": "0.1.0",
+  "defaultMode": "suggest",
+  "modes": {
+    "suggest": {
+      "description": "Propose a plan and artifacts; do not write files.",
+      "writes": false
+    },
+    "review": {
+      "description": "Write changes only after a named checkpoint is approved.",
+      "writes": true,
+      "requiresApproval": true
+    },
+    "autofix": {
+      "description": "Apply only the safe set without approval.",
+      "writes": true,
+      "requiresApproval": false
+    }
+  },
+  "skillModes": {
+    "manna-router": "suggest",
+    "manna-discovery": "suggest",
+    "manna-agent": "review",
+    "manna-tools": "review",
+    "manna-domain": "review",
+    "manna-graph": "review",
+    "manna-memory": "review",
+    "manna-pipeline": "review",
+    "manna-transport": "review",
+    "manna-evals": "review",
+    "manna-release": "suggest"
+  },
+  "safeSet": [
+    "formatting and import cleanup inside a generated slice",
+    "documentation and ADR updates with no behavior change",
+    "regenerating files whose spec did not change",
+    "adding contract tests that do not change behavior"
+  ],
+  "neverAutofix": [
+    "tool side-effect declarations",
+    "authentication or authorization",
+    "secrets or environment configuration",
+    "Neo4j constraints, indexes, or destructive migrations",
+    "data deletion or destructive pipeline apply",
+    "changes to external-write tools",
+    "package or dependency additions"
+  ]
+}

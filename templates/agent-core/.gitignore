@@ -1,0 +1,7 @@
+.env
+target/
+.idea/
+*.iml
+.DS_Store
+.manna/pipeline-applied.json
+data/**/applied.json

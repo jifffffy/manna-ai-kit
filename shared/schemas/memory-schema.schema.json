@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://manna.dev/schemas/memory-schema.schema.json",
+  "title": "Manna Memory Schema",
+  "type": "object",
+  "required": ["capability_id", "enabled"],
+  "additionalProperties": false,
+  "properties": {
+    "capability_id": { "type": "string", "pattern": "^F-[0-9]{3,}$" },
+    "enabled": { "type": "boolean" },
+    "context": { "type": "string", "default": "default" },
+    "propositions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "subject", "predicate", "object"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "subject": { "type": "string" },
+          "predicate": { "type": "string" },
+          "object": { "type": "string" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.6 },
+          "decay_days": { "type": "integer", "minimum": 0, "default": 90 }
+        }
+      }
+    },
+    "relations": { "type": "array", "items": { "type": "string" } },
+    "recall": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "limit": { "type": "integer", "minimum": 1, "maximum": 100, "default": 10 },
+        "order": { "type": "string", "default": "effectiveConfidence" },
+        "min_confidence": { "type": "number", "minimum": 0, "maximum": 1, "default": 0.3 }
+      }
+    },
+    "deletion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "soft_delete": { "type": "boolean", "default": true },
+        "user_can_forget": { "type": "boolean", "default": true }
+      }
+    }
+  }
+}

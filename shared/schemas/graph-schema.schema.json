@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://manna.dev/schemas/graph-schema.schema.json",
+  "title": "Manna Graph Schema",
+  "type": "object",
+  "required": ["capability_id", "enabled", "read_only"],
+  "additionalProperties": false,
+  "properties": {
+    "capability_id": { "type": "string", "pattern": "^F-[0-9]{3,}$" },
+    "enabled": { "type": "boolean" },
+    "read_only": { "type": "boolean" },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "properties"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "type"],
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string" },
+                "type": { "type": "string" },
+                "indexed": { "type": "boolean", "default": false }
+              }
+            }
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "from", "to"],
+        "additionalProperties": false,
+        "properties": {
+          "type": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "cardinality": { "enum": ["one", "many"], "default": "many" }
+        }
+      }
+    },
+    "constraints": { "type": "array", "items": { "type": "string" } },
+    "queries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "cypher", "read_only"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "cypher": { "type": "string" },
+          "read_only": { "type": "boolean" }
+        }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "strategy": { "enum": ["additive", "backfill", "breaking"], "default": "additive" },
+        "rollback": { "type": "string" }
+      }
+    }
+  }
+}

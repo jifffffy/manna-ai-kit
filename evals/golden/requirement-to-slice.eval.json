@@ -1,0 +1,42 @@
+{
+  "id": "requirement-to-slice",
+  "workflow": "requirement-to-slice",
+  "fixture": "examples/example.spec.json",
+  "expected": {
+    "must_detect": [
+      "external-write tool",
+      "graph vertical",
+      "memory vertical"
+    ],
+    "must_create": [
+      ".manna/features/F-001.spec.json",
+      "src/main/java/**/FindSessionsAgent.java"
+    ],
+    "must_do": [
+      "stop at CHECKPOINT: SPEC",
+      "anchor the domain slice before agent/tools",
+      "stop at CHECKPOINT: DOMAIN",
+      "stop at CHECKPOINT: GRAPH",
+      "stop at CHECKPOINT: AGENT",
+      "stop at CHECKPOINT: TOOLS",
+      "declare every tool side_effects"
+    ],
+    "must_not": [
+      "create a UI",
+      "create an admin backend",
+      "design tools before domain/relations",
+      "start from entities"
+    ]
+  },
+  "pass_criteria": "spec validates, every tool declares side effects, generated project validates, no UI dependency",
+  "triggers": {
+    "should": [
+      "build a new capability",
+      "generate a project for this domain"
+    ],
+    "should_not": [
+      "fix a typo",
+      "rename a variable"
+    ]
+  }
+}

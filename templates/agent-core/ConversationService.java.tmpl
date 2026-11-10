@@ -1,0 +1,108 @@
+/*
+ * Copyright 2024-{{year}} {{copyrightHolder}}
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package {{package}}.conversation;
+
+import com.embabel.agent.api.channel.MessageOutputChannelEvent;
+import com.embabel.agent.api.channel.OutputChannel;
+import com.embabel.agent.api.channel.OutputChannelEvent;
+import com.embabel.agent.api.identity.SimpleUser;
+import com.embabel.chat.ChatSession;
+import com.embabel.chat.Chatbot;
+import com.embabel.chat.Message;
+import com.embabel.chat.UserMessage;
+import {{package}}.MannaProperties;
+import org.springframework.stereotype.Service;
+
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Headless conversation entrypoint. One in-memory session per conversation id.
+ */
+@Service
+public class ConversationService {
+
+    private static final long TIMEOUT_SECONDS = 60;
+
+    private final Chatbot chatbot;
+    private final MannaProperties properties;
+    private final Map<String, Session> sessions = new ConcurrentHashMap<>();
+
+    public ConversationService(Chatbot chatbot, MannaProperties properties) {
+        this.chatbot = chatbot;
+        this.properties = properties;
+    }
+
+    public String chat(String conversationId, String message) {
+        var id = (conversationId == null || conversationId.isBlank()) ? "default" : conversationId;
+        var session = sessions.computeIfAbsent(id, this::createSession);
+        session.channel().clear();
+        session.chatSession().onUserMessage(new UserMessage(message));
+
+        try {
+            var reply = session.channel().poll(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            return reply != null ? reply.getContent() : "The agent did not produce a response in time.";
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return "The request was interrupted.";
+        }
+    }
+
+    public int activeSessions() {
+        return sessions.size();
+    }
+
+    private Session createSession(String conversationId) {
+        var channel = new QueueOutputChannel();
+        var user = new SimpleUser(
+                conversationId,
+                conversationId,
+                conversationId,
+                conversationId + "@example.invalid"
+        );
+        var chatSession = chatbot.createSession(user, channel, "default", properties.name());
+        return new Session(chatSession, channel);
+    }
+
+    private record Session(ChatSession chatSession, QueueOutputChannel channel) {
+    }
+
+    /**
+     * Captures assistant messages emitted by the agent.
+     */
+    static final class QueueOutputChannel implements OutputChannel {
+
+        private final BlockingQueue<Message> messages = new LinkedBlockingQueue<>();
+
+        @Override
+        public void send(OutputChannelEvent event) {
+            if (event instanceof MessageOutputChannelEvent messageEvent) {
+                messages.offer(messageEvent.getMessage());
+            }
+        }
+
+        Message poll(long timeout, TimeUnit unit) throws InterruptedException {
+            return messages.poll(timeout, unit);
+        }
+
+        void clear() {
+            messages.clear();
+        }
+    }
+}
