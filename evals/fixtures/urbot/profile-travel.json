@@ -1,0 +1,8 @@
+{
+  "directoryExists": true,
+  "request": "创建一个名为 travel 的旅行助手，人格专业友好，目标是帮助用户规划行程",
+  "discovery": {
+    "profiles": [],
+    "targetProfile": "travel"
+  }
+}

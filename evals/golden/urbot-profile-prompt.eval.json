@@ -4,15 +4,16 @@
   "fixture": "evals/fixtures/urbot/profile.json",
   "cases": [
     { "fixture": "evals/fixtures/urbot/profile.json", "workflow": "urbot-profile-change" },
-    { "fixture": "evals/fixtures/urbot/prompt.json", "workflow": "urbot-prompt-tuning" }
+    { "fixture": "evals/fixtures/urbot/prompt.json", "workflow": "urbot-prompt-tuning" },
+    { "fixture": "evals/fixtures/urbot/profile-travel.json", "workflow": "urbot-profile-change" }
   ],
   "expected": {
     "must_detect": ["profile intent", "prompt intent"],
     "must_create": [],
-    "must_do": ["select urbot-profile-change for a profile request", "select urbot-prompt-tuning for a prompt request"],
+    "must_do": ["select urbot-profile-change for a profile request", "select urbot-prompt-tuning for a prompt request", "route the travel profile creation to urbot-profile-change"],
     "must_not": ["silently split a multi-intent request", "use obsolete urbot.persona"]
   },
-  "pass_criteria": "profile and prompt fixtures route to their respective workflows",
+  "pass_criteria": "profile, prompt, and travel profile fixtures route to their expected workflows",
   "triggers": {
     "should": ["add a new profile", "change the persona"],
     "should_not": ["add a write tool", "add a domain entity"]

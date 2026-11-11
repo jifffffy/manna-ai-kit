@@ -171,7 +171,9 @@
       "workflow": "workflows/urbot-profile-change.md",
       "skills": [
         "urbot-discovery",
-        "urbot-profile"
+        "urbot-profile",
+        "urbot-prompt",
+        "urbot-verification"
       ],
       "triggers": [
         "new profile",

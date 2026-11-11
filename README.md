@@ -105,6 +105,25 @@ See `docs/architecture.md` for the full extension-model and CLI contract.
 
 ---
 
+## Profile write workflow (Phase 2)
+
+The first write workflow creates or updates a bot profile. For a bot named `travel` it writes:
+
+- `src/main/java/com/embabel/bot/travel/TravelConfiguration.java` — `@Configuration @Profile("travel")`.
+- `src/main/resources/application-travel.properties` — `urbot.bot-packages=com.embabel.bot.travel` plus the
+  current `urbot.chat.*` bindings.
+- `src/main/resources/prompts/personas/travel.jinja`
+- `src/main/resources/prompts/objectives/travel.jinja`
+
+`urbot.bot-packages` is set in the profile-specific properties so the package is scanned only when the profile
+is active; `@Profile` is defense-in-depth. Activation stays external (`--spring.profiles.active=travel`), never
+hardcoded. The workflow runs `urbot-discovery → urbot-profile → urbot-prompt → urbot-verification`, stops at
+`CHECKPOINT: PROFILE` before writing, and verifies with `./mvnw -DskipTests compile` and `./mvnw test`.
+
+Tools, domain, and memory workflows remain out of scope for this phase.
+
+---
+
 ## Configuration is source-first
 
 `UrbotProperties.java`, `ChatbotOptions.java`, `application.yml`, and the actual
@@ -218,8 +237,9 @@ manna-ai-kit/
 
 ## Honest limitations
 
-- `manna urbot init` and `manna urbot inspect` are implemented **read-only** in Phase 1; they do not modify
-  Urbot or implement a modification workflow.
+- `manna urbot init` and `manna urbot inspect` are read-only. The Phase 2 profile write workflow is the first
+  mutation path and writes only after `CHECKPOINT: PROFILE`; tool, domain, and memory workflows remain
+  skeletons.
 - The older `manna-*` skills and workflows still carry generator-era content; the full rewrite lands in a
   later change.
 - The generator and generated example remain in the tree but are deprecated; they are not the product.

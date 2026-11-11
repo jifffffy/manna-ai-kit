@@ -13,19 +13,23 @@ requires:
 
 ## When to use
 
-A request changes how a bot speaks or what it optimizes: persona, objective, or behaviour.
+A request changes how a bot speaks or what it optimizes: persona, objective, or behaviour. It is also the
+prompt-drafting step inside `urbot-profile-change`.
 
 ## Inputs
 
 - The target profile.
 - The current `prompts/personas|objectives|behaviours/<botname>.jinja`.
+- The user's persona/objective description.
 
-## Process (Phase 1: skeleton)
+## Process
 
 1. Inspect the current prompt resources and the source-backed config bindings.
-2. State the prompt files that would change.
-3. Stop at `CHECKPOINT: PROMPT PLAN`.
-4. Do not write in Phase 1.
+2. Draft the persona and objective text, plus an optional behaviour template.
+3. In `urbot-profile-change`, hand the draft to `urbot-profile` so the approved write produces
+   `prompts/personas/<bot>.jinja` and `prompts/objectives/<bot>.jinja`.
+4. For a standalone prompt-only request, state the prompt plan and stop at `CHECKPOINT: PROMPT PLAN`.
+5. Do not write prompt files yourself; the profile workflow owns the write after `CHECKPOINT: PROFILE`.
 
 ## Output
 

@@ -12,7 +12,8 @@
     "lock:check": "node scripts/dev/update-lock.mjs --check",
     "check:positioning": "node scripts/dev/check-positioning.mjs",
     "test:routing": "node scripts/dev/test-routing.mjs",
-    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/test-routing.mjs && node scripts/dev/test-generator.mjs",
+    "test:profile": "node scripts/dev/test-profile-change.mjs",
+    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/test-routing.mjs && node scripts/dev/test-profile-change.mjs && node scripts/dev/test-generator.mjs",
     "test:compile": "node scripts/dev/test-generated-compile.mjs"
   },
   "files": [

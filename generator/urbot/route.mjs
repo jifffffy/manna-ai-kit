@@ -15,12 +15,12 @@ export const ROUTE_DETAILS = {
     verificationCommands: DEFAULT_COMMANDS
   },
   "urbot-profile-change": {
-    skills: ["urbot-discovery", "urbot-profile"],
+    skills: ["urbot-discovery", "urbot-profile", "urbot-prompt", "urbot-verification"],
     targetFiles: [
+      "src/main/java/com/embabel/bot/<botname>/<BotName>Configuration.java",
       "src/main/resources/application-<botname>.properties",
       "src/main/resources/prompts/personas/<botname>.jinja",
-      "src/main/resources/prompts/objectives/<botname>.jinja",
-      "src/main/resources/prompts/behaviours/<botname>.jinja"
+      "src/main/resources/prompts/objectives/<botname>.jinja"
     ],
     verificationCommands: DEFAULT_COMMANDS
   },
@@ -59,11 +59,11 @@ export const ROUTE_DETAILS = {
 export const ROUTE_IDS = Object.keys(ROUTE_DETAILS);
 
 const INTENT_WORDS = {
-  prompt: ["persona", "objective", "behaviour", "behavior", "prompt"],
-  tool: ["tool", "mcp", "subagent", "reference", "integrate", "external api", "webhook"],
-  domainMemory: ["namedentity", "named entity", "relation", "memory", "domain"],
+  prompt: ["persona", "objective", "behaviour", "behavior", "prompt", "人格", "目标", "行为", "提示词"],
+  tool: ["tool", "mcp", "subagent", "reference", "integrate", "external api", "webhook", "工具", "接入", "子代理"],
+  domainMemory: ["namedentity", "named entity", "relation", "memory", "domain", "实体", "关系", "记忆", "领域"],
   profile: ["profile"],
-  verification: ["test", "compile", "regression", "verify", "verification", "build"]
+  verification: ["test", "compile", "regression", "verify", "verification", "build", "测试", "编译", "回归", "验证"]
 };
 
 export function routeRequest({ directoryExists, request, discovery = {} }) {
@@ -71,11 +71,12 @@ export function routeRequest({ directoryExists, request, discovery = {} }) {
 
   const text = String(request ?? "").toLowerCase();
   const matches = [];
+  const profileCreation = isProfileCreation(text);
   if (isBootstrap(text)) matches.push("urbot-bootstrap");
-  if (hasAny(text, INTENT_WORDS.prompt)) matches.push("urbot-prompt-tuning");
+  if (!profileCreation && hasAny(text, INTENT_WORDS.prompt)) matches.push("urbot-prompt-tuning");
   if (hasAny(text, INTENT_WORDS.tool)) matches.push("urbot-tool-development");
   if (hasAny(text, INTENT_WORDS.domainMemory)) matches.push("urbot-domain-memory");
-  if (hasAny(text, INTENT_WORDS.profile)) matches.push("urbot-profile-change");
+  if (profileCreation || hasAny(text, INTENT_WORDS.profile)) matches.push("urbot-profile-change");
   if (hasAny(text, INTENT_WORDS.verification)) matches.push("urbot-verification");
 
   const unique = [...new Set(matches)];
@@ -94,6 +95,7 @@ function isBootstrap(text) {
   const explicit =
     /\b(new project|new bot|new urbot bot|create a bot|create a new bot|create a new urbot bot|bootstrap|scaffold|initialize|start a new project|start a new bot)\b/;
   if (explicit.test(text)) return true;
+  if (/创建.*(项目|应用|工程)|新建.*(项目|应用|工程)|新项目|搭建/.test(text)) return true;
   return (
     /\b(create|start|initialize)\b/.test(text) &&
     /\b(project|bot)\b/.test(text) &&
@@ -103,8 +105,17 @@ function isBootstrap(text) {
   );
 }
 
+function isProfileCreation(text) {
+  const creation = /\b(create|new|add)\b/.test(text) || /创建|新建|新增/.test(text);
+  const noun = /\b(assistant|profile)\b/.test(text) || /助手|机器人|智能体/.test(text);
+  return creation && noun;
+}
+
 function hasAny(text, words) {
-  return words.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, "i").test(text));
+  return words.some((word) => {
+    if (/[\u4e00-\u9fff]/.test(word)) return text.includes(word);
+    return new RegExp(`\\b${escapeRegExp(word)}\\b`, "i").test(text);
+  });
 }
 
 function detail(route, discovery) {

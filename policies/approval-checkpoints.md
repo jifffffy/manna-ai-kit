@@ -7,6 +7,7 @@ Manna uses named checkpoints so a user can approve exactly one phase, never a va
 | Checkpoint | Approves | Never approves |
 |------------|----------|----------------|
 | `SPEC` | capability goal, non-goals, acceptance criteria, design mode | code |
+| `PROFILE` | bot package, configuration class, profile properties, prompt resources | tools, domain, memory, framework edits |
 | `DOMAIN` | entities, fields, relations, invariants, canonical registry | graph or migrations |
 | `GRAPH` | labels, relationship contract, constraints, query policy | data writes |
 | `AGENT` | actions, goals, planner mode, confirmation points | tools or data |

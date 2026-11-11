@@ -20,14 +20,17 @@ A request asks whether a Urbot project compiles, passes tests, or regressed.
 - The target Urbot project.
 - The requested verification scope.
 
-## Process (Phase 1: read-only)
+## Process
 
 1. Inspect Git status and the current commit.
-2. Report the relevant compile and test commands:
-   `./mvnw -q -DskipTests compile` and `./mvnw -q test`.
-3. State that integration tests are excluded unless the environment provides them.
-4. Stop at `CHECKPOINT: VERIFICATION REPORT`.
-5. Do not edit source and do not claim a command passed unless it ran.
+2. For a profile change, check the activation contract:
+   - the configuration class is `@Profile("<bot>")`;
+   - `urbot.bot-packages=com.embabel.bot.<bot>` lives in `application-<bot>.properties`;
+   - the configuration loads with the profile active and is absent when inactive.
+3. Run or report the relevant commands: `./mvnw -q -DskipTests compile` and `./mvnw -q test`.
+4. State that integration tests are excluded unless the environment provides them.
+5. Stop at `CHECKPOINT: VERIFICATION REPORT`.
+6. Do not edit source and do not claim a command passed unless it ran.
 
 ## Output
 

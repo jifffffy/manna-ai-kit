@@ -195,6 +195,14 @@ src/main/resources/
     └── behaviours/<botname>.jinja
 ```
 
+### 3.1 Profile writes are the first approved mutation
+A profile change writes only the bot package, profile properties, and prompts. The configuration class is
+`@Configuration @Profile("<bot>")`, and `application-<bot>.properties` sets
+`urbot.bot-packages=com.embabel.bot.<bot>` so the package is scanned only when the profile is active. Do not
+hardcode `spring.profiles.active`; activate externally. Stop at `CHECKPOINT: PROFILE` before writing, and
+apply with `skills/urbot-profile/scripts/apply.mjs --approve`. Tool, domain, and memory workflows are not part
+of this path.
+
 ### 4. Configuration is source-first
 `UrbotProperties.java`, `ChatbotOptions.java`, `application.yml`, and the actual
 `application-<profile>.properties` are authoritative. The names in

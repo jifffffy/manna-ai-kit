@@ -1,3 +1,4 @@
 # urbot-profile references
 
-Phase 1 skeleton. Add source-backed references here when the workflow is implemented.
+The profile extension model and activation contract live in `SKILL.md` and `docs/architecture.md`.
+The executable writer is `scripts/apply.mjs`.

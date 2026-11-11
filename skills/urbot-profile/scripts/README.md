@@ -1,3 +1,4 @@
 # urbot-profile scripts
 
-Phase 1 skeleton. Keep scripts read-only until the write workflows land.
+`apply.mjs` writes the approved profile. It refuses to write without `--approve` and refuses to overwrite
+existing files without `--force`. It only touches the bot profile package and resources.
