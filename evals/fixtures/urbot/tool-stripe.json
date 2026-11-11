@@ -1,0 +1,5 @@
+{
+  "directoryExists": true,
+  "request": "接入 Stripe",
+  "discovery": { "targetProfile": "travel" }
+}

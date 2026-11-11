@@ -120,7 +120,22 @@ is active; `@Profile` is defense-in-depth. Activation stays external (`--spring.
 hardcoded. The workflow runs `urbot-discovery → urbot-profile → urbot-prompt → urbot-verification`, stops at
 `CHECKPOINT: PROFILE` before writing, and verifies with `./mvnw -DskipTests compile` and `./mvnw test`.
 
-Tools, domain, and memory workflows remain out of scope for this phase.
+---
+
+## Tool write workflow (Phase 3)
+
+The tool workflow supports `@LlmTool`, `LlmReference`, `ToolishRag`, `Subagent`, and MCP. It writes a
+profile-gated tool configuration in the bot package; `ChatActions` collects `Tool` and `LlmReference` beans
+automatically through `List<...>` injection.
+
+Every tool declares one side effect in the Manna plan — `read`, `internal-write`, `external-write`, or
+`destructive` — plus any secret environment variable. External writes require idempotency or dry-run plus
+approval and are generated as dry-run stubs; destructive tools are never auto-applied. The workflow stops at
+`CHECKPOINT: TOOLS`, applies with `skills/urbot-tool/scripts/apply.mjs --approve`, generates tests, and verifies
+with `./mvnw -DskipTests compile` and `./mvnw test`. Domain or memory changes route to `urbot-domain-memory` as
+a separate workflow.
+
+Examples: "增加天气查询工具", "接入 Stripe", "增加 MCP 工具", "添加一个 Subagent".
 
 ---
 
@@ -237,8 +252,8 @@ manna-ai-kit/
 
 ## Honest limitations
 
-- `manna urbot init` and `manna urbot inspect` are read-only. The Phase 2 profile write workflow is the first
-  mutation path and writes only after `CHECKPOINT: PROFILE`; tool, domain, and memory workflows remain
+- `manna urbot init` and `manna urbot inspect` are read-only. The Phase 2 profile and Phase 3 tool workflows
+  are the mutation paths and write only after their checkpoints; domain and memory workflows remain
   skeletons.
 - The older `manna-*` skills and workflows still carry generator-era content; the full rewrite lands in a
   later change.

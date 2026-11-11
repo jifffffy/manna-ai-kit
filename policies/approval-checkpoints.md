@@ -11,7 +11,7 @@ Manna uses named checkpoints so a user can approve exactly one phase, never a va
 | `DOMAIN` | entities, fields, relations, invariants, canonical registry | graph or migrations |
 | `GRAPH` | labels, relationship contract, constraints, query policy | data writes |
 | `AGENT` | actions, goals, planner mode, confirmation points | tools or data |
-| `TOOLS` | tool contracts, side effects, approvals, idempotency, secrets list | implementation |
+| `TOOLS` | tool contracts, side effects, approvals, idempotency, secrets list, generated tests | implementation |
 | `MEMORY` | proposition types, projections, recall policy | live extraction |
 | `PIPELINE` | ingest, enrichment, review lifecycle, apply/rollback | production apply |
 | `TRANSPORT` | endpoints, SSE behavior, CLI/MCP surface | deployment |

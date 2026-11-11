@@ -203,6 +203,16 @@ hardcode `spring.profiles.active`; activate externally. Stop at `CHECKPOINT: PRO
 apply with `skills/urbot-profile/scripts/apply.mjs --approve`. Tool, domain, and memory workflows are not part
 of this path.
 
+### 3.2 Tool writes follow the same approval path
+A tool change adds `@LlmTool`, `LlmReference`, `ToolishRag`, `Subagent`, or MCP to an existing bot. Put the
+beans in a `@Configuration @Profile("<bot>")` class in the bot package; `ChatActions` collects `Tool` and
+`LlmReference` beans through `List<...>` injection. Declare exactly one side effect (`read`,
+`internal-write`, `external-write`, `destructive`) and any secret environment variable in the Manna plan.
+External writes need an idempotency key or dry-run plus approval; destructive tools are never auto-applied.
+Stop at `CHECKPOINT: TOOLS`, apply with `skills/urbot-tool/scripts/apply.mjs --approve`, and verify with the
+generated tests plus `./mvnw test`. If the tool needs a new entity, relation, or memory behavior, stop and run
+`urbot-domain-memory` separately.
+
 ### 4. Configuration is source-first
 `UrbotProperties.java`, `ChatbotOptions.java`, `application.yml`, and the actual
 `application-<profile>.properties` are authoritative. The names in

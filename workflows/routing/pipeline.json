@@ -204,7 +204,8 @@
       "workflow": "workflows/urbot-tool-development.md",
       "skills": [
         "urbot-discovery",
-        "urbot-tool"
+        "urbot-tool",
+        "urbot-verification"
       ],
       "triggers": [
         "tool",

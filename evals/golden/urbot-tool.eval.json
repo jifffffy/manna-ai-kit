@@ -2,15 +2,23 @@
   "id": "urbot-tool",
   "workflow": "urbot-tool-development",
   "fixture": "evals/fixtures/urbot/tool.json",
+  "cases": [
+    { "fixture": "evals/fixtures/urbot/tool.json", "workflow": "urbot-tool-development" },
+    { "fixture": "evals/fixtures/urbot/tool-weather.json", "workflow": "urbot-tool-development" },
+    { "fixture": "evals/fixtures/urbot/tool-stripe.json", "workflow": "urbot-tool-development" },
+    { "fixture": "evals/fixtures/urbot/tool-mcp.json", "workflow": "urbot-tool-development" },
+    { "fixture": "evals/fixtures/urbot/tool-subagent.json", "workflow": "urbot-tool-development" },
+    { "fixture": "evals/fixtures/urbot/tool-toolish-rag.json", "workflow": "urbot-tool-development" }
+  ],
   "expected": {
-    "must_detect": ["tool intent", "MCP intent"],
+    "must_detect": ["tool intent", "MCP intent", "subagent intent", "ToolishRag intent"],
     "must_create": [],
-    "must_do": ["select urbot-tool-development", "report the tool contract and target files"],
-    "must_not": ["invent a second domain model", "add an external write without approval"]
+    "must_do": ["select urbot-tool-development", "report the tool contract, side effect, and target files"],
+    "must_not": ["invent a second domain model", "add an external write without approval", "run multiple unbounded workflows"]
   },
-  "pass_criteria": "fixture routes to urbot-tool-development",
+  "pass_criteria": "all tool fixtures route to urbot-tool-development",
   "triggers": {
-    "should": ["add an MCP tool", "integrate an external API"],
+    "should": ["add a weather tool", "integrate Stripe", "add an MCP tool", "add a subagent", "add a ToolishRag"],
     "should_not": ["change the objective", "run regression tests"]
   }
 }

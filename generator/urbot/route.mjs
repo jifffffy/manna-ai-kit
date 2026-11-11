@@ -34,10 +34,13 @@ export const ROUTE_DETAILS = {
     verificationCommands: DEFAULT_COMMANDS
   },
   "urbot-tool-development": {
-    skills: ["urbot-discovery", "urbot-tool"],
+    skills: ["urbot-discovery", "urbot-tool", "urbot-verification"],
     targetFiles: [
-      "src/main/java/com/embabel/bot/<botname>/<BotName>Tools.java",
-      "src/main/java/com/embabel/bot/<botname>/<BotName>Configuration.java"
+      "src/main/java/com/embabel/bot/<botname>/<ToolName>Tools.java",
+      "src/main/java/com/embabel/bot/<botname>/<ToolName>Agent.java",
+      "src/main/java/com/embabel/bot/<botname>/<ToolName>ToolConfiguration.java",
+      "src/test/java/com/embabel/bot/<botname>/<ToolName>ToolTest.java",
+      "src/main/resources/application-<botname>.properties"
     ],
     verificationCommands: DEFAULT_COMMANDS
   },
@@ -60,7 +63,7 @@ export const ROUTE_IDS = Object.keys(ROUTE_DETAILS);
 
 const INTENT_WORDS = {
   prompt: ["persona", "objective", "behaviour", "behavior", "prompt", "人格", "目标", "行为", "提示词"],
-  tool: ["tool", "mcp", "subagent", "reference", "integrate", "external api", "webhook", "工具", "接入", "子代理"],
+  tool: ["tool", "toolishrag", "mcp", "subagent", "reference", "integrate", "external api", "webhook", "工具", "接入", "子代理"],
   domainMemory: ["namedentity", "named entity", "relation", "memory", "domain", "实体", "关系", "记忆", "领域"],
   profile: ["profile"],
   verification: ["test", "compile", "regression", "verify", "verification", "build", "测试", "编译", "回归", "验证"]

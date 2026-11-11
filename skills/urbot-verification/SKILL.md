@@ -1,6 +1,6 @@
 ---
 name: urbot-verification
-description: Report Urbot project state and verification commands without modifying source in Phase 1.
+description: Report Urbot project state and verification commands without modifying source.
 version: 0.1.0
 mode-default: suggest
 requires:
@@ -27,10 +27,15 @@ A request asks whether a Urbot project compiles, passes tests, or regressed.
    - the configuration class is `@Profile("<bot>")`;
    - `urbot.bot-packages=com.embabel.bot.<bot>` lives in `application-<bot>.properties`;
    - the configuration loads with the profile active and is absent when inactive.
-3. Run or report the relevant commands: `./mvnw -q -DskipTests compile` and `./mvnw -q test`.
-4. State that integration tests are excluded unless the environment provides them.
-5. Stop at `CHECKPOINT: VERIFICATION REPORT`.
-6. Do not edit source and do not claim a command passed unless it ran.
+3. For a tool change, check the collection contract:
+   - the generated `Tool`/`LlmReference` bean is present with the bot profile active;
+   - it is absent without the profile;
+   - MCP is verified from profile-scoped properties without a live server;
+   - no Stripe/MCP/LLM endpoint is called.
+4. Run or report the relevant commands: `./mvnw -q -DskipTests compile` and `./mvnw -q test`.
+5. State that integration tests are excluded unless the environment provides them.
+6. Stop at `CHECKPOINT: VERIFICATION REPORT`.
+7. Do not edit source and do not claim a command passed unless it ran.
 
 ## Output
 

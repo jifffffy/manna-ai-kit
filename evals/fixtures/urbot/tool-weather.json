@@ -1,0 +1,5 @@
+{
+  "directoryExists": true,
+  "request": "增加天气查询工具",
+  "discovery": { "targetProfile": "travel" }
+}

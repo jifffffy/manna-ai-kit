@@ -1,0 +1,5 @@
+{
+  "directoryExists": true,
+  "request": "添加一个 Subagent",
+  "discovery": { "targetProfile": "travel" }
+}
