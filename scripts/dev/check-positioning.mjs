@@ -9,7 +9,10 @@ const errors = [];
 const agents = read("AGENTS.md");
 const readme = read("README.md");
 const architecture = read("docs/architecture.md");
-const design = read("openspec/changes/reposition-manna-as-urbot-orchestrator/design.md");
+const mainSpec = "openspec/specs/manna-urbot-orchestrator/spec.md";
+const activeSpec =
+  "openspec/changes/reposition-manna-as-urbot-orchestrator/specs/manna-urbot-orchestrator/spec.md";
+const spec = read(fs.existsSync(path.join(ROOT, mainSpec)) ? mainSpec : activeSpec);
 
 const URBOT_REPO = "https://github.com/jifffffy/urbot";
 const SOURCE_PATHS = [
@@ -60,12 +63,14 @@ for (const source of SOURCE_PATHS) {
 }
 require(architecture, URBOT_REPO, "docs/architecture.md must name the Urbot repository");
 
-require(design, "manna urbot init", "design.md must specify `manna urbot init`");
-require(design, "--repo https://github.com/jifffffy/urbot", "design.md must pin the Urbot repo");
-require(design, "manna urbot inspect", "design.md must specify `manna urbot inspect`");
-require(design, "prompts/personas|objectives|behaviours/<botname>.jinja", "design.md must document bot prompts");
+require(architecture, "manna urbot init", "docs/architecture.md must specify `manna urbot init`");
+require(architecture, "manna urbot inspect", "docs/architecture.md must specify `manna urbot inspect`");
+require(architecture, "--repo https://github.com/jifffffy/urbot", "docs/architecture.md must pin the Urbot repo");
+require(architecture, "prompts/{personas,objectives,behaviours}/<botname>.jinja", "docs/architecture.md must document bot prompts");
+require(spec, URBOT_REPO, "main spec must name the Urbot repository");
+require(spec, "prompts/personas|objectives|behaviours/<botname>.jinja", "main spec must document bot prompts");
 for (const legacy of LEGACY_NAMES) {
-  require(design, legacy, `design.md must mark ${legacy} obsolete`);
+  require(spec, legacy, `main spec must name obsolete property ${legacy}`);
 }
 
 const skillNames = fs

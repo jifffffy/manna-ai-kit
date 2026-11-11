@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "version": "0.1.0",
-  "digest": "5903164e69c2e76e431f08ac15d4f06b642d28f27aab2f05b9a20a2316a5a0e9",
-  "generatedAt": "2026-11-11T14:02:53.974Z",
+  "digest": "497d9fe3b5f9e18aaa0624c5245f87cf1feed5f88c0b39564938bfdc7eca8425",
+  "generatedAt": "2026-11-11T14:03:29.581Z",
   "files": {
     ".claude-plugin/plugin.json": "23a7557c65b81562b6f553f66114fe09dfaa985074c90311732ebd7847e76d98",
     ".gitignore": "eb33cb5a6d201ee5292cd5a4f7a3c0a52f8d1fcb1ecaf9334e18c62b88944d6b",
@@ -25,7 +25,7 @@
     "policies/approval-checkpoints.md": "00a41d11545c99ab542b5c87275dd58d489b8105e645b7e916ce6f54be03093e",
     "policies/modes.json": "9d69dd0e04898c27e7763d6df692105d318b2305241dc203ca3fec03320ca3d2",
     "policies/tool-safety.md": "52bbe4ca7a94234aaa1b7d5c6a1ad156ce930a1c6d3d3d140a1af3ad05a21d4e",
-    "scripts/dev/check-positioning.mjs": "0952f25de3c115ae99cc0497387358fc4dc9b306ba6aa5261782c1bd2d0dd48e",
+    "scripts/dev/check-positioning.mjs": "25f8d1196c4de2b983d60a5ab28e30e8bb8db5fb1f9a640da80ed1a9875141db",
     "scripts/dev/test-generated-compile.mjs": "d658951afdfe664612e63bb333f98265e9859a2157da6a54e9c50358504d7ea8",
     "scripts/dev/test-generator.mjs": "39d95e0e8da40b038fa5500a712dd3c286b0427d09714aa6493dacf7024f4a24",
     "scripts/dev/update-lock.mjs": "27ccecf452a5108190364437e36a749d1038f95d7fbd613104fefa600accd07d",
