@@ -4,8 +4,6 @@ description: Turn a domain and requirement into a testable capability spec befor
 version: 0.1.0
 mode-default: suggest
 requires:
-  - shared/schemas/capability-spec.schema.json
-  - shared/schemas/project-spec.schema.json
   - shared/patterns/domain-anchored-design.md
   - policies/approval-checkpoints.md
 ---
@@ -35,7 +33,7 @@ requires:
    - Non-goals
 2. **Ask at most three questions** if a decision materially changes the design. Otherwise choose a
    reasonable default and record it as an assumption.
-3. **Draft the capability spec** using `shared/schemas/capability-spec.schema.json`, in design order:
+3. **Draft the capability spec** in design order:
    - `id` (`F-001`), `name`, `className`, `package`
    - `capability`
    - `domain` (the minimal subgraph this capability needs)

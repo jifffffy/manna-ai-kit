@@ -5,7 +5,6 @@ version: 0.1.0
 mode-default: review
 requires:
   - shared/schemas/domain-slice.schema.json
-  - shared/schemas/capability-spec.schema.json
   - shared/patterns/domain-anchored-design.md
   - shared/patterns/java-conventions.md
 ---

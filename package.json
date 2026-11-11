@@ -1,7 +1,7 @@
 {
   "name": "manna-ai-kit",
   "version": "0.1.0",
-  "description": "Domain-anchored, agent-delivered, spec-driven project generator and evolution kit for headless Embabel services.",
+  "description": "Natural-language development orchestrator for the Urbot JVM bot platform.",
   "type": "module",
   "bin": {
     "manna": "generator/manna.mjs"
@@ -11,11 +11,11 @@
     "lock": "node scripts/dev/update-lock.mjs",
     "lock:check": "node scripts/dev/update-lock.mjs --check",
     "check:positioning": "node scripts/dev/check-positioning.mjs",
+    "check:legacy": "node scripts/dev/check-legacy.mjs",
     "test:routing": "node scripts/dev/test-routing.mjs",
     "test:profile": "node scripts/dev/test-profile-change.mjs",
     "test:tool": "node scripts/dev/test-tool-development.mjs",
-    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/test-routing.mjs && node scripts/dev/test-profile-change.mjs && node scripts/dev/test-tool-development.mjs && node scripts/dev/test-generator.mjs",
-    "test:compile": "node scripts/dev/test-generated-compile.mjs"
+    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/check-legacy.mjs && node scripts/dev/test-routing.mjs && node scripts/dev/test-profile-change.mjs && node scripts/dev/test-tool-development.mjs"
   },
   "files": [
     "AGENTS.md",
@@ -30,9 +30,7 @@
     "shared/",
     "workflows/",
     "policies/",
-    "templates/",
     "generator/",
-    "examples/",
     "docs/"
   ],
   "engines": {
@@ -51,6 +49,7 @@
     "neo4j",
     "dice",
     "ai-kit",
-    "codegen"
+    "urbot",
+    "orchestrator"
   ]
 }

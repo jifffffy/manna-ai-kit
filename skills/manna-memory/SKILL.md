@@ -4,7 +4,6 @@ description: Design DICE propositions, graph projections and recall policy for d
 version: 0.1.0
 mode-default: review
 requires:
-  - shared/schemas/memory-schema.schema.json
   - shared/patterns/dice-conventions.md
   - policies/approval-checkpoints.md
 ---

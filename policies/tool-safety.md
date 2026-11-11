@@ -40,7 +40,7 @@ Omission is a validation error, not a default.
 
 ## Domain boundary
 
-A tool's inputs and outputs must map to canonical entities and relationships in `.manna/domain.json`.
+A tool's inputs and outputs must map to Urbot-owned types in the bot package's `domain/`.
 If a tool needs a new field, entity or relation, stop and reopen `CHECKPOINT: DOMAIN` or
 `CHECKPOINT: GRAPH`. Never give a tool a private type.
 

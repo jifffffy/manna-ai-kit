@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { computeDigest, walk } from "../../generator/lib/lock.mjs";
+import { computeDigest, walk } from "./lock-utils.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const CHECK = process.argv.includes("--check");
@@ -13,6 +13,7 @@ const excluded = new Set([
   "skills.lock",
   ".git",
   ".opencode",
+  "legacy",
   "node_modules",
   "openspec",
   "target",

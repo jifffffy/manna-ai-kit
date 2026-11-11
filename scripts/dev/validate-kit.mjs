@@ -182,7 +182,9 @@ function jsonFiles() {
   const files = [];
   function visit(dir) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      if (["node_modules", ".git", "target"].includes(entry.name)) continue;
+      if (["node_modules", ".git", "target", "legacy", ".opencode", "openspec", ".github"].includes(entry.name)) {
+        continue;
+      }
       const absolute = path.join(dir, entry.name);
       if (entry.isDirectory()) visit(absolute);
       else if (entry.isFile() && entry.name.endsWith(".json")) files.push(absolute);

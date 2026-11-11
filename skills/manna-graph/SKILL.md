@@ -4,7 +4,6 @@ description: Design Neo4j labels, relationships, constraints, queries and migrat
 version: 0.1.0
 mode-default: review
 requires:
-  - shared/schemas/graph-schema.schema.json
   - shared/patterns/neo4j-conventions.md
   - policies/approval-checkpoints.md
 ---

@@ -82,16 +82,16 @@ const workflowNames = fs
   .filter((name) => name.endsWith(".md"));
 
 for (const [name, text, headings] of [
-  ["AGENTS.md", agents, ["#### Retain", "#### Rewrite", "#### Deprecate"]],
-  ["README.md", readme, ["### Retain", "### Rewrite", "### Deprecate"]]
+  ["AGENTS.md", agents, ["#### Retain", "#### Rewrite", "#### Moved to legacy"]],
+  ["README.md", readme, ["### Retain", "### Rewrite", "### Moved to legacy"]]
 ]) {
   const rewrite = section(text, headings[1]);
   const deprecate = section(text, headings[2]);
   if (!rewrite) errors.push(`${name} is missing the Rewrite inventory`);
-  if (!deprecate) errors.push(`${name} is missing the Deprecate inventory`);
+  if (!deprecate) errors.push(`${name} is missing the Moved to legacy inventory`);
   for (const skill of skillNames) {
     if (!rewrite?.includes(skill)) errors.push(`${name} Rewrite inventory is missing skill ${skill}`);
-    if (deprecate?.includes(skill)) errors.push(`${name} must not deprecate skill ${skill}`);
+    if (deprecate?.includes(skill)) errors.push(`${name} must not move skill ${skill} to legacy`);
   }
   for (const workflow of workflowNames) {
     if (!rewrite?.includes(workflow)) errors.push(`${name} Rewrite inventory is missing workflow ${workflow}`);

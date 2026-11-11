@@ -8,8 +8,9 @@ Manna is a **natural-language development orchestrator for Urbot**, not an appli
 - Manna decides **which development flow a request takes**: route, inspect, plan, apply, verify.
 - Authoritative Urbot repository: <https://github.com/jifffffy/urbot>.
 
-Manna does not own a Spring Boot runtime and does not define a domain model. The old generated runtime and
-its specs are deprecated and remain in the tree only until the `legacy/` move.
+Manna does not own a Spring Boot runtime and does not define a domain model. The retired generator, templates,
+schemas, examples, and tests live under `legacy/`; they are historical reference only and are not part of the
+main path.
 
 ## Layers
 
@@ -20,7 +21,8 @@ Workflows      order, checkpoints, hand-offs
 Policies       modes, tool safety, approvals
 Shared         patterns, schemas, report contracts
 Evals          golden routing and verification checks
-Generator      DEPRECATED project generator (do not extend)
+Urbot CLI      generator/manna.mjs + generator/urbot/
+Legacy         legacy/ (historical, not shipped, do not import)
 ```
 
 ## Urbot authority
@@ -89,8 +91,9 @@ safety, lock, and golden routing eval mechanism are the spine that stays intact.
   tool-safety policy, kit lock, golden routing eval mechanism, document format.
 - **Rewrite**: all `manna-*` skills to `urbot-*` names (see `README.md`), all workflows to Urbot development
   steps, and `AGENTS.md` to Urbot-authoritative guidance.
-- **Deprecate (mark only)**: `templates/agent-core/`, generator commands, project schemas, `.manna` project
-  artifacts, `project.designMode`, `F-001` IDs. Physical removal is a later change.
+- **Moved to `legacy/`**: `legacy/templates/agent-core/`, the retired generator commands and `lib/`, the five
+  project schemas, `legacy/examples/`, `legacy/scripts/`, and `legacy/evals/golden/`. `.manna` project
+  artifacts, `project.designMode`, and `F-001` IDs live inside those assets. Deletion is a later release.
 
 ## Verification ladder
 

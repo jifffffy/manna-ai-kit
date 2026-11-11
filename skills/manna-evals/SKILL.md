@@ -51,17 +51,17 @@ Never replace a lower layer with a higher one.
 
 ```json
 {
-  "id": "requirement-to-slice",
-  "skill": "manna-discovery",
-  "fixture": "examples/example.spec.json",
+  "id": "urbot-profile",
+  "workflow": "urbot-profile-change",
+  "fixture": "evals/fixtures/urbot/profile.json",
   "expected": {
-    "must_detect": ["external-write tool"],
-    "must_create": [".manna/features/F-001.spec.json"],
-    "must_do": ["stop at CHECKPOINT: SPEC"],
-    "must_not": ["create a UI", "skip side_effects"]
+    "must_detect": ["profile intent"],
+    "must_create": ["src/main/resources/application-travel.properties"],
+    "must_do": ["stop at CHECKPOINT: PROFILE"],
+    "must_not": ["create a second application", "use obsolete property names"]
   },
-  "pass_criteria": "spec validates and all invariant checks pass",
-  "triggers": { "should": ["build a new capability"], "should_not": ["fix a typo"] }
+  "pass_criteria": "the profile fixture routes correctly and the plan is reviewable",
+  "triggers": { "should": ["add a profile"], "should_not": ["fix a typo"] }
 }
 ```
 

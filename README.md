@@ -22,7 +22,7 @@ It is **not**:
 
 - a second Spring Boot application,
 - a second domain model,
-- a project generator (the old generator is deprecated; see [Asset disposition](#asset-disposition)).
+- a project generator; the retired generator lives under `legacy/` (see [Asset disposition](#asset-disposition)).
 
 ```text
 User request
@@ -45,13 +45,12 @@ Requirements: Node >= 22. The kit itself has no npm dependencies; do not run `np
 npm run validate
 npm test
 npm run check:positioning
+npm run check:legacy
 ```
 
-Compile the legacy generated example (deprecated path, needs JDK 21+ and network):
-
-```bash
-npm run test:compile
-```
+> **Legacy:** the retired generator, templates, schemas, examples, and tests live under `legacy/`. They are
+> historical reference only, are not shipped, are not imported by the main path, and are removed after one
+> release.
 
 Phase 1 provides a read-only inspect-and-route CLI:
 
@@ -201,17 +200,17 @@ Phase 1 Urbot assets (new): `skills/urbot-discovery`, `skills/urbot-profile`, `s
 `workflows/urbot-tool-development.md`, `workflows/urbot-domain-memory.md`,
 `workflows/urbot-verification.md`.
 
-### Deprecate (mark only — do not delete or move yet)
+### Moved to legacy/ (not shipped; remove after one release)
 
-- `templates/agent-core/`.
-- Generator commands `init`, `slice`, `validate`, `lock`.
-- `shared/schemas/project-spec.schema.json`, `capability-spec.schema.json`, `graph-schema.schema.json`,
-  `memory-schema.schema.json`, `pipeline-schema.schema.json`.
-- `.manna/domain.json`, `.manna/project.spec.json`, generated-project `.manna/lock.json`.
-- `project.designMode`.
-- `F-001` capability IDs.
+- `legacy/templates/agent-core/`.
+- `legacy/generator/` containing the retired `init`/`slice`/`validate`/`lock` commands and `lib/`.
+- `legacy/shared/schemas/project-spec.schema.json`, `capability-spec.schema.json`,
+  `graph-schema.schema.json`, `memory-schema.schema.json`, `pipeline-schema.schema.json`.
+- `legacy/examples/`, `legacy/scripts/`, and `legacy/evals/golden/`.
+- `.manna/domain.json`, `.manna/project.spec.json`, generated-project `.manna/lock.json`,
+  `project.designMode`, and `F-001` capability IDs live inside those legacy assets.
 
-The physical move to `legacy/` belongs to a later change.
+The main path does not import or require `legacy/`; a later release deletes it.
 
 ---
 
@@ -224,7 +223,7 @@ The physical move to `legacy/` belongs to a later change.
    never auto-applied.
 5. **Review in Git.** Changes are diffs and pull requests, not admin screens.
 6. **Smallest change, verified.** Inspect → plan → apply → compile/test/eval, one logical step at a time.
-7. **Deprecations are marked, not deleted.** The `legacy/` move is a separate change.
+7. **Legacy is isolated, not maintained.** `legacy/` is historical and removed after one release.
 8. **Secrets in env only.**
 
 See `policies/tool-safety.md`, `workflows/routing/pipeline.json`, and `docs/architecture.md`.
@@ -240,11 +239,10 @@ manna-ai-kit/
 ├── workflows/                 # 14 workflows (6 Urbot Phase 1) + routing
 ├── policies/                  # modes, tool safety, approval checkpoints
 ├── shared/                    # patterns, schemas, report schemas
-├── templates/agent-core/      # DEPRECATED generated runtime
-├── generator/                 # DEPRECATED generator + Phase 1 urbot CLI
-├── examples/                  # DEPRECATED generated example + slices
+├── generator/                 # Urbot CLI (manna.mjs + urbot/)
+├── legacy/                    # retired generator, templates, schemas, examples, tests
 ├── evals/golden/              # golden routing evals (retained)
-├── scripts/dev/               # validate, lock, positioning check, generator test
+├── scripts/dev/               # validate, lock, positioning/legacy checks, workflow tests
 └── openspec/                  # change proposals and specs
 ```
 
@@ -257,7 +255,8 @@ manna-ai-kit/
   skeletons.
 - The older `manna-*` skills and workflows still carry generator-era content; the full rewrite lands in a
   later change.
-- The generator and generated example remain in the tree but are deprecated; they are not the product.
+- The retired generator, templates, schemas, examples, and tests live under `legacy/`; the main path does not
+  import them, and they will be removed after one release.
 - Behavior evals need a live LLM and are tagged `integration`; they are not deterministic.
 
 ---

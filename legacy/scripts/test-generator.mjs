@@ -3,10 +3,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { addSlice, initProject } from "../../generator/lib/generate.mjs";
-import { validateProject } from "../../generator/lib/validate.mjs";
+import { addSlice, initProject } from "../generator/lib/generate.mjs";
+import { validateProject } from "../generator/lib/validate.mjs";
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "manna-test-"));
 
 try {

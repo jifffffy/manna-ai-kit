@@ -9,7 +9,7 @@ description: One sentence that starts with a verb and names the trigger.
 version: 0.1.0
 mode-default: suggest
 requires:
-  - shared/schemas/capability-spec.schema.json
+  - docs/architecture.md
   - shared/patterns/embabel-patterns.md
 ---
 ```

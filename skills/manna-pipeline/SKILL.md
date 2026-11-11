@@ -4,7 +4,6 @@ description: Design file-based ingest, enrichment, human review and idempotent a
 version: 0.1.0
 mode-default: review
 requires:
-  - shared/schemas/pipeline-schema.schema.json
   - shared/patterns/pipeline-review.md
   - policies/approval-checkpoints.md
 ---

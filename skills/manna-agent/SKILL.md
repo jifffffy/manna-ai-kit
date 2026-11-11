@@ -6,7 +6,6 @@ mode-default: review
 requires:
   - shared/patterns/embabel-patterns.md
   - shared/patterns/domain-anchored-design.md
-  - shared/schemas/capability-spec.schema.json
   - policies/approval-checkpoints.md
 ---
 

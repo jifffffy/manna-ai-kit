@@ -26,7 +26,7 @@ Manna uses named checkpoints so a user can approve exactly one phase, never a va
 3. Approval applies only to the artifact shown. A later change reopens the checkpoint.
 4. `autofix` may skip approval only for `policies/modes.json` `safeSet`.
 5. If a change crosses a checkpoint boundary, stop and ask before continuing.
-6. Record approvals in `.manna/state.json` with timestamp and artifact hash.
+6. Record approvals in the change/PR or the optional gitignored `.manna-run/` state.
 
 ## Escalation
 
