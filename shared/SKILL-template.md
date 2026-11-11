@@ -4,13 +4,13 @@ Every `skills/<id>/SKILL.md` starts with YAML frontmatter:
 
 ```yaml
 ---
-name: manna-example
+name: urbot-example
 description: One sentence that starts with a verb and names the trigger.
 version: 0.1.0
 mode-default: suggest
 requires:
   - docs/architecture.md
-  - shared/patterns/embabel-patterns.md
+  - policies/approval-checkpoints.md
 ---
 ```
 

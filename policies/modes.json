@@ -18,17 +18,7 @@
     }
   },
   "skillModes": {
-    "manna-router": "suggest",
-    "manna-discovery": "suggest",
-    "manna-agent": "review",
-    "manna-tools": "review",
-    "manna-domain": "review",
-    "manna-graph": "review",
-    "manna-memory": "review",
-    "manna-pipeline": "review",
-    "manna-transport": "review",
-    "manna-evals": "review",
-    "manna-release": "suggest",
+    "urbot-router": "suggest",
     "urbot-discovery": "suggest",
     "urbot-profile": "review",
     "urbot-tool": "review",
@@ -37,9 +27,9 @@
     "urbot-verification": "suggest"
   },
   "safeSet": [
-    "formatting and import cleanup inside a generated slice",
+    "formatting and import cleanup inside a Urbot bot package",
     "documentation and ADR updates with no behavior change",
-    "regenerating files whose spec did not change",
+    "regenerating files from an approved plan",
     "adding contract tests that do not change behavior"
   ],
   "neverAutofix": [

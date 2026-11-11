@@ -82,7 +82,7 @@ for (const [name, mode] of Object.entries(modes.skillModes ?? {})) {
 }
 
 for (const skill of skillDirs) {
-  if (skill !== "manna-router" && !routing.skillRoutes?.[skill]) {
+  if (skill !== "urbot-router" && !routing.skillRoutes?.[skill]) {
     errors.push(`workflows/routing/pipeline.json has no route for ${skill}`);
   }
 }

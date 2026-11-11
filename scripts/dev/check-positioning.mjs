@@ -82,19 +82,19 @@ const workflowNames = fs
   .filter((name) => name.endsWith(".md"));
 
 for (const [name, text, headings] of [
-  ["AGENTS.md", agents, ["#### Retain", "#### Rewrite", "#### Moved to legacy"]],
-  ["README.md", readme, ["### Retain", "### Rewrite", "### Moved to legacy"]]
+  ["AGENTS.md", agents, ["#### Retain", "#### Urbot-only assets", "#### Deleted"]],
+  ["README.md", readme, ["### Retain", "### Urbot-only assets", "### Deleted"]]
 ]) {
-  const rewrite = section(text, headings[1]);
-  const deprecate = section(text, headings[2]);
-  if (!rewrite) errors.push(`${name} is missing the Rewrite inventory`);
-  if (!deprecate) errors.push(`${name} is missing the Moved to legacy inventory`);
+  const urbotOnly = section(text, headings[1]);
+  const deleted = section(text, headings[2]);
+  if (!urbotOnly) errors.push(`${name} is missing the Urbot-only assets inventory`);
+  if (!deleted) errors.push(`${name} is missing the Deleted inventory`);
   for (const skill of skillNames) {
-    if (!rewrite?.includes(skill)) errors.push(`${name} Rewrite inventory is missing skill ${skill}`);
-    if (deprecate?.includes(skill)) errors.push(`${name} must not move skill ${skill} to legacy`);
+    if (!urbotOnly?.includes(skill)) errors.push(`${name} Urbot-only inventory is missing skill ${skill}`);
+    if (deleted?.includes(skill)) errors.push(`${name} must not mark Urbot skill ${skill} as deleted`);
   }
   for (const workflow of workflowNames) {
-    if (!rewrite?.includes(workflow)) errors.push(`${name} Rewrite inventory is missing workflow ${workflow}`);
+    if (!urbotOnly?.includes(workflow)) errors.push(`${name} Urbot-only inventory is missing workflow ${workflow}`);
   }
 }
 

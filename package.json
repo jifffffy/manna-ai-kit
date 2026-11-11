@@ -11,11 +11,11 @@
     "lock": "node scripts/dev/update-lock.mjs",
     "lock:check": "node scripts/dev/update-lock.mjs --check",
     "check:positioning": "node scripts/dev/check-positioning.mjs",
-    "check:legacy": "node scripts/dev/check-legacy.mjs",
+    "check:urbot-only": "node scripts/dev/check-urbot-only.mjs",
     "test:routing": "node scripts/dev/test-routing.mjs",
     "test:profile": "node scripts/dev/test-profile-change.mjs",
     "test:tool": "node scripts/dev/test-tool-development.mjs",
-    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/check-legacy.mjs && node scripts/dev/test-routing.mjs && node scripts/dev/test-profile-change.mjs && node scripts/dev/test-tool-development.mjs"
+    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/check-urbot-only.mjs && node scripts/dev/test-routing.mjs && node scripts/dev/test-profile-change.mjs && node scripts/dev/test-tool-development.mjs"
   },
   "files": [
     "AGENTS.md",

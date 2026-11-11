@@ -19,19 +19,17 @@ The kit has **zero npm dependencies** — do not run `npm install`; the scripts 
 - `npm run validate` — content lint; run after any edit.
 - `npm run lock` — regenerate `skills.lock` after editing any shipped file.
 - `npm run lock:check` — CI's stale-lock check (compares the digest, not `generatedAt`).
-- `npm run check:positioning` — asserts the Urbot repositioning and asset inventory stay consistent.
-- `npm run check:legacy` — asserts `legacy/` is isolated and the main path has no legacy references.
-- `npm test` — runs `check:positioning`, `check:legacy`, the routing evals, the profile check, and the tool
-  check.
-- The retired generator commands (`init`/`slice`/`validate`/`lock`) live under `legacy/generator/manna.mjs`
-  for historical reference. Do not build new guidance on them or import them from the main path.
+- `npm run check:positioning` — asserts the Urbot positioning and asset inventory stay consistent.
+- `npm run check:urbot-only` — asserts the main path is Urbot-only and no legacy assets or references remain.
+- `npm test` — runs `check:positioning`, `check:urbot-only`, the routing evals, the profile check, and the
+  tool check.
 
 CI is `validate` → `lock:check` → `test`. Run all three before calling work done.
 
-### Legacy
-`legacy/` holds the retired generator, templates, schemas, examples, and tests. It is historical reference
-only: not shipped, not imported by the main path, and scheduled for deletion after one release. Do not add new
-guidance or imports that point into `legacy/`.
+### Urbot-only main path
+The retired generator, templates, schemas, examples, tests, and all `manna-*` skills/workflows have been
+deleted. The main path is Urbot-only: `generator/manna.mjs`, `generator/urbot/`, the seven `urbot-*` skills,
+the six `urbot-*` workflows, and the retained orchestration spine. Do not reintroduce a legacy path.
 
 ### Adding or renaming a skill
 1. `skills/<id>/SKILL.md` copied from `shared/SKILL-template.md`. Frontmatter `name` must equal the directory.
@@ -41,8 +39,8 @@ guidance or imports that point into `legacy/`.
 5. `policies/modes.json` `skillModes` entry must agree.
 6. `npm run lock`, then `npm run validate`.
 
-The skill set is being rewritten to Urbot names (see *Rewrite* below). Until that change lands, keep the
-current `manna-*` directories, manifests, modes, and routes in sync; do not half-rename a skill.
+The skill set is Urbot-only. Add `urbot-*` skills and keep `skills.json`, `.well-known`,
+`workflows/routing/pipeline.json`, `policies/modes.json`, and `skills.lock` in sync.
 
 ### Version bumps
 `package.json`, `skills.json`, and `.claude-plugin/plugin.json` share one version. The
@@ -54,84 +52,53 @@ current `manna-*` directories, manifests, modes, and routes in sync; do not half
 - **Source wins over prose.** Resolve behavior from the Urbot source inventory below. The old
   `src/main/java/com/embabel/bot/README.md` is known to lag the code and is not authoritative.
 - **Spec is no longer the source of truth for a Manna app.** Generated projects, `.manna/project.spec.json`,
-  `.manna/domain.json`, `project.designMode` and `F-001` IDs are retired and live under `legacy/`. Change
-  Urbot source and specs; do not add new Manna-generated artifacts.
-- **Legacy is isolated, not maintained.** The retired generator, templates, schemas, examples, and tests live
-  under `legacy/`. Do not import them from the main path or extend them; delete them after one release.
+  `.manna/domain.json`, `project.designMode` and `F-001` IDs are deleted. Change Urbot source and specs; do
+  not add Manna-generated artifacts.
+- **Urbot-only main path.** The retired generator, `manna-*` skills, and legacy workflows have been deleted.
+  Do not reintroduce them under any name.
 - **Retain the orchestration spine.** Keep the router architecture, routing pipeline structure, validator,
   manifests, plugin metadata, modes, tool-safety policy, kit lock, golden routing eval mechanism, and the
   skills/workflow document format.
 - **Headless remains non-negotiable.** Urbot exposes REST/SSE and optional CLI/MCP. No UI, no admin backend.
 - **Tool safety is non-negotiable.** Read `policies/tool-safety.md`. Default to read-only. Any
   `external-write` requires idempotency and approval; `destructive` is never auto-applied.
-- `evals/`, `.github/`, `.opencode/`, `legacy/`, `openspec/`, `README.md` and `skills.lock` are outside the
-  kit's install digest; everything else ships and changing it can make installs look stale.
-- The legacy generator under `legacy/` is frozen; do not extend it.
-- Do not add a backticked `manna-*` name to shipped Markdown unless it exists as a skill or workflow; target
-  `urbot-*` names are inventory placeholders until the rewrite change creates them.
+- `evals/`, `.github/`, `.opencode/`, `openspec/`, `README.md` and `skills.lock` are outside the kit's install
+  digest; everything else ships and changing it can make installs look stale.
+- Do not add a backticked `manna-*` name; the skill set is Urbot-only.
 
-### Legacy generator (historical)
-The old generator, templates, examples, and tests live under `legacy/`. They are not shipped and are not
-imported by the main path; delete them after one release. The notes below are historical only.
-
-- Tool bodies are safe stubs returning `"<tool> is not implemented yet"`; a green compile does **not** mean the
-  capability works.
-- `.manna/lock.json` is a drift guard over generated source. Editing generated `.java`/`pom.xml`/`.manna` specs
-  invalidates it; editing `data/**` (pipeline CSVs), `.manna/state.json`, `.manna/lock.json` or
-  `.manna/pipeline-applied.txt` does not.
+### Urbot verification notes
 - Contract tests need no LLM/Neo4j: `./mvnw test`, or one test with
-  `./mvnw -Dtest=<ClassName>ContractTest test`. Surefire excludes `@Tag("integration")` and `**/*IT.java`.
-  `./mvnw spring-boot:run` needs Neo4j (`docker compose up -d`).
+  `./mvnw -Dtest=<ClassName>Test test`. Surefire excludes `@Tag("integration")` and `**/*IT.java`.
+- `./mvnw spring-boot:run` needs Neo4j (`docker compose up -d`) and the model credentials.
 
 ### Asset disposition
 
-#### Retain (re-scoped to Urbot)
-- `skills/manna-router` routing architecture → later becomes the Urbot intent router.
+#### Retain
+- `skills/urbot-router` routing architecture.
 - `workflows/routing/pipeline.json` entrypoint / `skillRoutes` / `triggers` structure.
 - `scripts/dev/validate-kit.mjs`.
 - `skills.json`, `.well-known/agent-skills/index.json`, `.claude-plugin/plugin.json`.
 - `policies/modes.json`, `policies/tool-safety.md`, kit-level `skills.lock`.
 - `evals/golden/*` golden routing eval mechanism.
-- The skills/workflow Markdown document format.
+- `shared/SKILL-template.md` (skills/workflow document format).
 
-#### Rewrite (current → Urbot)
-- `manna-router` → Urbot intent router.
-- `manna-discovery` → `urbot-discovery`.
-- `manna-tools` → `urbot-tool`.
-- `manna-domain` + `manna-graph` + `manna-memory` → `urbot-domain-memory`.
-- `manna-agent` → merged into `urbot-profile` or `urbot-tool`.
-- `manna-evals` → `urbot-verification`.
-- `manna-pipeline` → `urbot-pipeline` (target id finalized in the rewrite change).
-- `manna-transport` → `urbot-transport` (target id finalized in the rewrite change).
-- `manna-release` → `urbot-release` (target id finalized in the rewrite change).
-- `workflows/requirement-to-slice.md` → first Urbot bot capability.
-- `workflows/feature-add.md` → add a bot capability.
-- `workflows/feature-modify.md` → modify a bot capability.
-- `workflows/tool-integration.md` → integrate an Urbot tool.
-- `workflows/memory-tuning.md` → tune bot memory.
-- `workflows/data-pipeline.md` → Urbot data pipeline.
-- `workflows/quality-gate.md` → Urbot verification gate.
-- `workflows/release.md` → version and release Urbot.
-- `skills/urbot-discovery`, `skills/urbot-profile`, `skills/urbot-tool`,
-  `skills/urbot-domain-memory`, `skills/urbot-prompt`, `skills/urbot-verification` → Phase 1 Urbot skill
-  skeletons (only discovery is implemented read-only).
-- `workflows/urbot-bootstrap.md` → new project or bot bootstrap.
-- `workflows/urbot-profile-change.md` → add or modify a bot profile.
-- `workflows/urbot-prompt-tuning.md` → tune persona, objective, or behaviour.
-- `workflows/urbot-tool-development.md` → add a Tool, MCP tool, subagent, or reference.
-- `workflows/urbot-domain-memory.md` → add NamedEntity, relations, or memory.
-- `workflows/urbot-verification.md` → compile, test, and regression verification.
+#### Urbot-only assets
+- `skills/urbot-router`, `skills/urbot-discovery`, `skills/urbot-profile`, `skills/urbot-tool`,
+  `skills/urbot-domain-memory`, `skills/urbot-prompt`, `skills/urbot-verification`.
+- `workflows/urbot-bootstrap.md`, `workflows/urbot-profile-change.md`,
+  `workflows/urbot-prompt-tuning.md`, `workflows/urbot-tool-development.md`,
+  `workflows/urbot-domain-memory.md`, `workflows/urbot-verification.md`.
 
-#### Moved to legacy/ (not shipped; remove after one release)
-- `legacy/templates/agent-core/`.
-- `legacy/generator/` containing the retired `init`/`slice`/`validate`/`lock` commands and `lib/`.
-- `legacy/shared/schemas/project-spec.schema.json`, `capability-spec.schema.json`,
-  `graph-schema.schema.json`, `memory-schema.schema.json`, `pipeline-schema.schema.json`.
-- `legacy/examples/`, `legacy/scripts/`, and `legacy/evals/golden/`.
-- `.manna/domain.json`, `.manna/project.spec.json`, generated-project `.manna/lock.json`,
-  `project.designMode`, and `F-001` capability IDs live inside those legacy assets.
+#### Deleted
+- `legacy/` (the retired generator, templates, examples, schemas, tests, and old golden evals).
+- `manna-router`, `manna-discovery`, `manna-agent`, `manna-tools`, `manna-domain`, `manna-graph`,
+  `manna-memory`, `manna-pipeline`, `manna-transport`, `manna-evals`, `manna-release`.
+- `workflows/requirement-to-slice.md`, `feature-add.md`, `feature-modify.md`, `tool-integration.md`,
+  `memory-tuning.md`, `data-pipeline.md`, `quality-gate.md`, `release.md`.
+- `shared/patterns/`, `shared/schemas/`, `.manna/project.spec.json`, `.manna/domain.json`,
+  generated `.manna/lock.json`, `project.designMode`, and `F-001` IDs.
 
-The main path does not import or require `legacy/`; a later release deletes it.
+The main path is Urbot-only; do not reintroduce a deleted asset.
 
 ### Minimal CLI (Phase 1: read-only)
 ```bash
@@ -152,9 +119,8 @@ manna urbot inspect \
 without writing to it. Later changes add `plan`, `apply`, and real modification workflows. State writing is
 opt-in and goes to a gitignored `.manna-run/`.
 
-Canonical references: `shared/SKILL-template.md`, `shared/patterns/domain-anchored-design.md`,
-`shared/patterns/embabel-patterns.md`, `shared/patterns/generation-invariants.md`, `shared/schemas/`,
-`policies/tool-safety.md`, `workflows/routing/pipeline.json`, and `docs/architecture.md`.
+Canonical references: `shared/SKILL-template.md`, `policies/tool-safety.md`,
+`workflows/routing/pipeline.json`, and `docs/architecture.md`.
 
 ---
 
@@ -167,7 +133,7 @@ natural-language request into a **routed Urbot development flow**: inspect the a
 plan, apply the smallest change, and verify it. You do not invent a parallel application or model.
 
 ### 1. Route before you act
-Consult the Urbot intent router (`skills/manna-router`, retained architecture) and
+Consult the Urbot intent router (`skills/urbot-router`) and
 `workflows/routing/pipeline.json` first. Do not improvise a flow that a workflow already defines.
 
 ### 2. Urbot is the only source of truth
@@ -265,7 +231,7 @@ names clearly marked as inventory placeholders until the rewrite change creates 
 | "I'll add a UI to review changes." | No UI. Review the Git diff/PR. |
 | "I'll wire the write endpoint now and add approvals later." | Approval is part of the tool contract. |
 | "I'll skip tool side effects; it's read-only." | Every tool declares side effects; omission is a failure. |
-| "I'll import the retired generator from `legacy/` for this one case." | No. Extend the Urbot workflow; `legacy/` is historical and deleted after one release. |
+| "I'll reintroduce a legacy skill or `legacy/` for this one case." | No. The main path is Urbot-only; extend an `urbot-*` workflow. |
 | "I'll half-rename the skills." | Keep manifests, routes, and modes in sync; rename as one unit. |
 | "Tests need a live LLM, so I'll skip them." | Use contract tests that need no LLM; tag live evals `integration`. |
 
@@ -276,5 +242,5 @@ changes, checks (inspect/compile/test/eval), assumptions, and what needs human r
 ---
 
 **Layered model:** Instructions (this file) → Skills (`skills/`) → Workflows (`workflows/`) → Policies
-(`policies/`) → Shared contracts (`shared/`) → Urbot CLI (`generator/manna.mjs` + `generator/urbot/`) →
-Evals (`evals/`). The retired generator lives under `legacy/` and is not part of the product.
+(`policies/`) → Shared document format (`shared/SKILL-template.md`) → Urbot CLI (`generator/manna.mjs` +
+`generator/urbot/`) → Evals (`evals/`). The main path is Urbot-only.

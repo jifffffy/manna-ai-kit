@@ -1,7 +1,7 @@
 {
   "name": "manna-ai-kit",
   "version": "0.1.0",
-  "description": "Domain-anchored, agent-delivered, spec-driven project generator and evolution kit for headless Embabel services.",
+  "description": "Natural-language development orchestrator for the Urbot JVM bot platform.",
   "author": {
     "name": "Embabel"
   },
@@ -9,17 +9,7 @@
   "repository": "https://github.com/embabel/manna-ai-kit",
   "license": "Apache-2.0",
   "skills": [
-    "skills/manna-router",
-    "skills/manna-discovery",
-    "skills/manna-agent",
-    "skills/manna-tools",
-    "skills/manna-domain",
-    "skills/manna-graph",
-    "skills/manna-memory",
-    "skills/manna-pipeline",
-    "skills/manna-transport",
-    "skills/manna-evals",
-    "skills/manna-release",
+    "skills/urbot-router",
     "skills/urbot-discovery",
     "skills/urbot-profile",
     "skills/urbot-tool",

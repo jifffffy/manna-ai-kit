@@ -9,8 +9,7 @@ Manna is a **natural-language development orchestrator for Urbot**, not an appli
 - Authoritative Urbot repository: <https://github.com/jifffffy/urbot>.
 
 Manna does not own a Spring Boot runtime and does not define a domain model. The retired generator, templates,
-schemas, examples, and tests live under `legacy/`; they are historical reference only and are not part of the
-main path.
+schemas, examples, tests, and all `manna-*` skills/workflows have been deleted; the main path is Urbot-only.
 
 ## Layers
 
@@ -19,10 +18,9 @@ Instructions   AGENTS.md (Urbot-authoritative)
 Skills         how to perform one kind of Urbot change
 Workflows      order, checkpoints, hand-offs
 Policies       modes, tool safety, approvals
-Shared         patterns, schemas, report contracts
+Shared         SKILL-template.md (document format)
 Evals          golden routing and verification checks
 Urbot CLI      generator/manna.mjs + generator/urbot/
-Legacy         legacy/ (historical, not shipped, do not import)
 ```
 
 ## Urbot authority
@@ -81,7 +79,7 @@ Request
   → review as a Git diff / PR
 ```
 
-The router is the retained `skills/manna-router` architecture, driven by
+The router is the retained `skills/urbot-router` architecture, driven by
 `workflows/routing/pipeline.json`. Skills and workflows are content; the validator, manifests, modes, tool
 safety, lock, and golden routing eval mechanism are the spine that stays intact.
 
@@ -89,11 +87,9 @@ safety, lock, and golden routing eval mechanism are the spine that stays intact.
 
 - **Retain**: routing architecture, routing pipeline structure, validator, manifests, plugin metadata, modes,
   tool-safety policy, kit lock, golden routing eval mechanism, document format.
-- **Rewrite**: all `manna-*` skills to `urbot-*` names (see `README.md`), all workflows to Urbot development
-  steps, and `AGENTS.md` to Urbot-authoritative guidance.
-- **Moved to `legacy/`**: `legacy/templates/agent-core/`, the retired generator commands and `lib/`, the five
-  project schemas, `legacy/examples/`, `legacy/scripts/`, and `legacy/evals/golden/`. `.manna` project
-  artifacts, `project.designMode`, and `F-001` IDs live inside those assets. Deletion is a later release.
+- **Urbot-only assets**: seven `urbot-*` skills and six `urbot-*` workflows, plus the Urbot CLI.
+- **Deleted**: `legacy/`, the eleven `manna-*` skills, the eight legacy workflows, `shared/patterns/`,
+  `shared/schemas/`, `.manna` project artifacts, `project.designMode`, and `F-001` IDs.
 
 ## Verification ladder
 
