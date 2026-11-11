@@ -10,7 +10,8 @@
     "validate": "node scripts/dev/validate-kit.mjs",
     "lock": "node scripts/dev/update-lock.mjs",
     "lock:check": "node scripts/dev/update-lock.mjs --check",
-    "test": "node scripts/dev/test-generator.mjs",
+    "check:positioning": "node scripts/dev/check-positioning.mjs",
+    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/test-generator.mjs",
     "test:compile": "node scripts/dev/test-generated-compile.mjs"
   },
   "files": [

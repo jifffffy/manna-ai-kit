@@ -12,7 +12,9 @@ const excluded = new Set([
   "README.md",
   "skills.lock",
   ".git",
+  ".opencode",
   "node_modules",
+  "openspec",
   "target",
   ".DS_Store",
   ".env"

@@ -1,25 +1,31 @@
-# AGENTS.md — Manna AI Kit
+# AGENTS.md — Manna AI Kit (Urbot Orchestrator)
 
 > **Two audiences.** This file is both repo guidance and a **shipped product artifact** (`package.json`
 > `files`). If you are maintaining the kit, read *Maintaining this kit* first. If you are using the kit to
-> generate or evolve a project, start at *Operating the kit*.
+> change Urbot, start at *Operating the kit*.
+>
+> **Positioning.** **Urbot decides how to develop. Manna decides which development flow a request takes.**
+> The authoritative Urbot repository is <https://github.com/jifffffy/urbot>. Manna does **not** generate a
+> second Spring Boot application and does **not** define a second domain model.
 
 ---
 
 ## Maintaining this kit
 
 Content + tooling only: Markdown, JSON, JS generators. No build step, no typecheck, no framework. Node >= 22.
+The kit has **zero npm dependencies** — do not run `npm install`; the scripts use only Node built-ins.
 
 ### Commands
 - `npm run validate` — content lint; run after any edit.
 - `npm run lock` — regenerate `skills.lock` after editing any shipped file.
-- `npm run lock:check` — CI's stale-lock check.
-- `npm test` — generates the example project into a temp dir and validates it.
-- `npm run test:compile` — generates the example project and compiles it with its Maven wrapper (needs Java 21).
-- `node generator/manna.mjs init <spec.json> <out-dir>` — scaffold a project.
-- `node generator/manna.mjs slice <project-dir> <slice.spec.json>` — add a capability slice.
-- `node generator/manna.mjs validate <project-dir>` — validate a generated project.
-- `node generator/manna.mjs lock <project-dir>` — regenerate the project lock.
+- `npm run lock:check` — CI's stale-lock check (compares the digest, not `generatedAt`).
+- `npm run check:positioning` — asserts the Urbot repositioning and asset inventory stay consistent.
+- `npm test` — runs `check:positioning`, generates the example project into a temp dir, validates it, adds two
+  slices, and asserts the fork/lock guards.
+- `npm run test:compile` — generates the example project and compiles it with `./mvnw -q -DskipTests compile`
+  (needs JDK 21+ and network for the wrapper; no Docker/Neo4j).
+- `node generator/manna.mjs init|slice|validate|lock` — **deprecated** generator commands (kept in place, not
+  deleted by this change). Do not build new guidance on them.
 
 CI is `validate` → `lock:check` → `test` → `test:compile`. Run all four before calling work done.
 
@@ -31,120 +37,207 @@ CI is `validate` → `lock:check` → `test` → `test:compile`. Run all four be
 5. `policies/modes.json` `skillModes` entry must agree.
 6. `npm run lock`, then `npm run validate`.
 
+The skill set is being rewritten to Urbot names (see *Rewrite* below). Until that change lands, keep the
+current `manna-*` directories, manifests, modes, and routes in sync; do not half-rename a skill.
+
 ### Version bumps
 `package.json`, `skills.json`, and `.claude-plugin/plugin.json` share one version. The
 `.well-known/agent-skills/index.json` version must match.
 
 ### Conventions that bite
-- **Never add a UI framework.** Generated projects are headless. No Vaadin, no admin console, no theme
-  service. The only transport surfaces are REST, SSE, CLI and MCP.
-- **Runtime core is Agent + Tools; design anchor is Domain + Neo4j relations.** Anchor the domain slice and
-  relation contract first, then design the agent and tools against it. Never let a tool invent its own
-  entity model.
-- **`project.designMode` is required.** Use `graph-first` (default) for graph-backed domains and
-  `capability-first` only for tool-only agents with no graph model.
-- **Spec is the source of truth.** Generated code is an artifact of `.manna/project.spec.json` and
-  `.manna/features/<id>.spec.json`. Do not hand-edit generated files without changing the spec and lock.
-- **One canonical domain.** `.manna/domain.json` is the entity/relation registry. The generator and
-  validator reject forking an entity into another slice package or using one relationship type with two
-  different shapes. Consolidate; do not rename around the guard.
-- **Every tool declares `side_effects`.** Allowed: `none`, `read`, `internal-write`, `external-write`,
-  `destructive`. `external-write` must declare idempotency; `destructive` is never auto-applied.
-- **No admin backend.** Human review lives in CSV/JSONL files, Git PRs and CLI. Never generate a review UI.
-- **A capability slice must compile, start, and pass its contract test on its own.**
-- `evals/`, `README.md` and `skills.lock` are outside the install digest; everything else ships and changing
-  it can make installs look stale.
-- The generator must remain deterministic: render from spec; never call an LLM inside `generator/`.
-- Do not add a backticked `manna-*` name to shipped Markdown unless it exists as a skill or workflow.
+- **Urbot is the only runtime and domain authority.** Manna routes and applies workflows against the Urbot
+  source tree. Never generate a second Spring Boot application, runtime, or entity model.
+- **Source wins over prose.** Resolve behavior from the Urbot source inventory below. The old
+  `src/main/java/com/embabel/bot/README.md` is known to lag the code and is not authoritative.
+- **Spec is no longer the source of truth for a Manna app.** Generated projects, `.manna/project.spec.json`,
+  `.manna/domain.json`, `project.designMode` and `F-001` IDs are deprecated. Change Urbot source and specs;
+  do not add new Manna-generated artifacts.
+- **Deprecations are marked, not deleted.** This change leaves deprecated assets in place; the later
+  `legacy/` move is a separate change. Do not remove them while doing ordinary edits.
+- **Retain the orchestration spine.** Keep the router architecture, routing pipeline structure, validator,
+  manifests, plugin metadata, modes, tool-safety policy, kit lock, golden routing eval mechanism, and the
+  skills/workflow document format.
+- **Headless remains non-negotiable.** Urbot exposes REST/SSE and optional CLI/MCP. No UI, no admin backend.
+- **Tool safety is non-negotiable.** Read `policies/tool-safety.md`. Default to read-only. Any
+  `external-write` requires idempotency and approval; `destructive` is never auto-applied.
+- `evals/`, `.github/`, `.opencode/`, `openspec/`, `README.md` and `skills.lock` are outside the kit's install
+  digest; everything else ships and changing it can make installs look stale.
+- The generator must remain deterministic while it exists: render from spec; never call an LLM inside
+  `generator/`.
+- Do not add a backticked `manna-*` name to shipped Markdown unless it exists as a skill or workflow; target
+  `urbot-*` names are inventory placeholders until the rewrite change creates them.
+
+### Generated-project gotchas (deprecated path)
+- Tool bodies are safe stubs returning `"<tool> is not implemented yet"`; a green compile does **not** mean the
+  capability works.
+- `.manna/lock.json` is a drift guard over generated source. Editing generated `.java`/`pom.xml`/`.manna` specs
+  invalidates it; editing `data/**` (pipeline CSVs), `.manna/state.json`, `.manna/lock.json` or
+  `.manna/pipeline-applied.txt` does not.
+- Contract tests need no LLM/Neo4j: `./mvnw test`, or one test with
+  `./mvnw -Dtest=<ClassName>ContractTest test`. Surefire excludes `@Tag("integration")` and `**/*IT.java`.
+  `./mvnw spring-boot:run` needs Neo4j (`docker compose up -d`).
+
+### Asset disposition
+
+#### Retain (re-scoped to Urbot)
+- `skills/manna-router` routing architecture → later becomes the Urbot intent router.
+- `workflows/routing/pipeline.json` entrypoint / `skillRoutes` / `triggers` structure.
+- `scripts/dev/validate-kit.mjs`.
+- `skills.json`, `.well-known/agent-skills/index.json`, `.claude-plugin/plugin.json`.
+- `policies/modes.json`, `policies/tool-safety.md`, kit-level `skills.lock`.
+- `evals/golden/*` golden routing eval mechanism.
+- The skills/workflow Markdown document format.
+
+#### Rewrite (current → Urbot)
+- `manna-router` → Urbot intent router.
+- `manna-discovery` → `urbot-discovery`.
+- `manna-tools` → `urbot-tool`.
+- `manna-domain` + `manna-graph` + `manna-memory` → `urbot-domain-memory`.
+- `manna-agent` → merged into `urbot-profile` or `urbot-tool`.
+- `manna-evals` → `urbot-verification`.
+- `manna-pipeline` → `urbot-pipeline` (target id finalized in the rewrite change).
+- `manna-transport` → `urbot-transport` (target id finalized in the rewrite change).
+- `manna-release` → `urbot-release` (target id finalized in the rewrite change).
+- `workflows/requirement-to-slice.md` → first Urbot bot capability.
+- `workflows/feature-add.md` → add a bot capability.
+- `workflows/feature-modify.md` → modify a bot capability.
+- `workflows/tool-integration.md` → integrate an Urbot tool.
+- `workflows/memory-tuning.md` → tune bot memory.
+- `workflows/data-pipeline.md` → Urbot data pipeline.
+- `workflows/quality-gate.md` → Urbot verification gate.
+- `workflows/release.md` → version and release Urbot.
+
+#### Deprecate (mark only — do not delete or move yet)
+- `templates/agent-core/`.
+- Generator commands `init`, `slice`, `validate`, `lock`.
+- `shared/schemas/project-spec.schema.json`, `capability-spec.schema.json`, `graph-schema.schema.json`,
+  `memory-schema.schema.json`, `pipeline-schema.schema.json`.
+- `.manna/domain.json`, `.manna/project.spec.json`, generated-project `.manna/lock.json`.
+- `project.designMode`.
+- `F-001` capability IDs.
+
+The physical move to `legacy/` belongs to a later change.
+
+### Minimal CLI (target surface)
+```bash
+manna urbot init \
+  --repo https://github.com/jifffffy/urbot \
+  --ref <ref> \
+  --dir <dir>
+
+manna urbot inspect \
+  --repo https://github.com/jifffffy/urbot \
+  --ref <ref> \
+  --project <dir> \
+  --request "<natural language request>"
+```
+Only these two commands are in scope for the repositioning. Later changes add `plan`, `apply`, and
+verification commands. The commands are specified here but not implemented yet.
 
 Canonical references: `shared/SKILL-template.md`, `shared/patterns/domain-anchored-design.md`,
 `shared/patterns/embabel-patterns.md`, `shared/patterns/generation-invariants.md`, `shared/schemas/`,
-`policies/tool-safety.md`, `workflows/routing/pipeline.json`.
+`policies/tool-safety.md`, `workflows/routing/pipeline.json`, and `docs/architecture.md`.
 
 ---
 
 ## Operating the kit (shipped instruction layer)
 
-> Any agent generating or evolving a manna project loads this first.
+> Any agent using Manna to change Urbot loads this first.
 
-You are a senior agent-platform engineer. You convert a domain + requirement into a **headless,
-domain-anchored, agent-delivered service**, one vertical capability slice at a time. You leave a real,
-compilable, testable project with explicit tool safety and auditable specs.
+You are a senior agent-platform engineer working on **Urbot**, a JVM/Embabel bot platform. You convert a
+natural-language request into a **routed Urbot development flow**: inspect the authoritative source, produce a
+plan, apply the smallest change, and verify it. You do not invent a parallel application or model.
 
 ### 1. Route before you act
-On any request, consult `skills/manna-router` and `workflows/routing/pipeline.json` first. Do not improvise
-a flow that a workflow already defines.
+Consult the Urbot intent router (`skills/manna-router`, retained architecture) and
+`workflows/routing/pipeline.json` first. Do not improvise a flow that a workflow already defines.
 
-### 2. Start from the capability, then anchor the domain
-Before writing code, produce a capability spec (`shared/schemas/capability-spec.schema.json`) that states:
-**Context / Objective / Inputs / Constraints / Acceptance Criteria**, plus non-goals.
-Then design in this order:
+### 2. Urbot is the only source of truth
+Resolve every question from this inventory, in order:
 
-**Domain slice → Neo4j relations → Agent → Tools → Memory → Pipeline → Transport → Evals**
+1. `pom.xml`
+2. `src/main/java/com/embabel/urbot/`
+3. `src/main/java/com/embabel/bot/<botname>/`
+4. `application-<profile>.properties`
+5. `src/main/resources/prompts/`
+6. `src/test/`
+7. Git history
 
-The domain slice is not a full ontology: include only what this capability needs, reuse from the canonical
-registry, and register the result. Tools are designed after the relation contract so they cannot fork
-their own types. `project.designMode` is `graph-first` by default; use `capability-first` only for
-tool-only agents with no graph model.
+Prose is fallible metadata. If source and prose disagree, source wins.
 
-### 3. The One Rule: never one-shot
-One logical step per edit. Validate between steps: spec schema → compile → contract test → behavior eval.
-Generating an entire application or a whole feature set in one pass is a failure mode, not efficiency.
+### 3. Follow the Urbot extension model
+A bot lives inside Urbot, not beside it:
 
-### 4. Everything you add must be a vertical slice
-A slice is complete only when it has:
-- domain types, invariants and canonical registry entries,
-- graph schema, relation contract and queries (or an explicit `enabled: false`),
-- agent/actions or a documented utility-agent tool,
-- tool contracts with side effects, approvals and idempotency,
-- memory schema and recall policy (or `enabled: false`),
-- pipeline ingest/review/apply (or `enabled: false`),
-- transport contract,
-- contract test and behavior eval,
-- a short doc + ADR.
+```text
+src/main/java/com/embabel/bot/<botname>/
+├── <BotName>Configuration.java
+├── <BotName>Tools.java
+├── <BotName>Agent.java
+└── domain/
 
-### 5. Tool safety is non-negotiable
+src/main/resources/
+├── application-<botname>.properties
+└── prompts/
+    ├── personas/<botname>.jinja
+    ├── objectives/<botname>.jinja
+    └── behaviours/<botname>.jinja
+```
+
+### 4. Configuration is source-first
+`UrbotProperties.java`, `ChatbotOptions.java`, `application.yml`, and the actual
+`application-<profile>.properties` are authoritative. The names in
+`src/main/java/com/embabel/bot/README.md` are **obsolete**: `urbot.persona`, `urbot.objective`,
+`urbot.max-words`, `urbot.chat-llm.model`. Use the current bindings:
+
+```properties
+urbot.bot-packages=com.embabel.bot.<botname>
+urbot.chat.persona=<botname>
+urbot.chat.objective=<botname>
+urbot.chat.behaviour=default
+urbot.chat.max-words=80
+urbot.chat.llm.model=gpt-4.1-mini
+urbot.chat.llm.temperature=0.0
+```
+
+### 5. Apply the smallest Urbot workflow
+One logical step per edit. Validate between steps: source inspection → plan → compile → contract test →
+behavior eval. Do not rewrite a whole bot or feature set in one pass.
+
+### 6. Tool safety is non-negotiable
 Read `policies/tool-safety.md`. Default to read-only tools. Any `external-write` requires idempotency and a
 confirmation checkpoint. Any `destructive` action is never auto-applied. Secrets live in env vars only.
 
-### 6. Anchor the domain slice, then consolidate it
-Domain entities come from the capability and its relation contract, not from individual tools. After each
-slice, run a consolidation pass: merge duplicates, normalize names and types, check relationship direction
-and cardinality, and assert invariants. Register the canonical model in `.manna/domain.json`; the validator
-rejects a forked entity or a conflicting relationship shape. Do not let each feature grow a private
-mini-model.
+### 7. No second runtime, no second domain
+Every type maps to an Urbot-owned package or resource. If a request needs a new capability, extend the Urbot
+bot package and its `domain/`; never create a Manna application, package, or parallel entity model.
 
-### 7. Headless means API-first
-Expose capabilities through REST + SSE by default. Add CLI or MCP only when the spec asks. There is no UI
-and no admin panel. Verify behavior with structured responses, tool-call traces and state assertions.
+### 8. Human review stays in Git
+Urbot changes are reviewed as diffs and pull requests. Do not generate a UI or admin backend for review,
+settings, or approvals.
 
-### 8. Human review without a backend
-Data pipelines use CSV or JSONL with a `status` lifecycle (`pending` → `approved`/`rejected`). Reviewers use
-spreadsheets, editors and Git. Applying data is a CLI or API command that is idempotent and reversible.
-
-### 9. Keep a ledger
-Maintain `.manna/state.json` with `RUN_ID`, current phase, completed slices and open checkpoints. After
-context truncation, re-read the spec, lock and ledger before continuing.
+### 9. Keep the inventory honest
+Update the retain / rewrite / deprecate lists when an asset moves between them. Keep the target `urbot-*`
+names clearly marked as inventory placeholders until the rewrite change creates the real directories.
 
 ### 10. Anti-rationalization — halt on these excuses
 | Excuse | Countermeasure |
 |--------|----------------|
-| "I'll add a small UI to review data." | No UI. Use CSV/JSONL + Git + CLI. |
-| "I'll add an admin page for settings." | No admin backend. Settings are env/config files. |
-| "The domain is obvious; I'll model the whole thing first." | Model only the subgraph this capability needs; register it and reuse before adding. |
-| "I'll design the tools first and derive the entities from them." | Anchor the domain slice and relation contract first; tools must not invent types. |
-| "A tool needs its own type; I'll add it locally." | Reopen `CHECKPOINT: DOMAIN` or `CHECKPOINT: GRAPH`; add it to the canonical registry. |
-| "This tool is read-only, I'll skip the declaration." | Every tool declares `side_effects`; omission is a validation failure. |
-| "I'll wire the write endpoint now and add approvals later." | Approval is part of the tool contract. Do not ship an unguarded external write. |
-| "I'll skip the graph/memory for now and add it later." | Set `enabled: false` explicitly with a reason in the spec. Never leave it implicit. |
-| "Tests need a live LLM, so I'll skip them." | Add contract tests that need no LLM; mark live-LLM evals as integration. |
-| "I'll hand-edit the generated file." | Change the spec, regenerate, then update the lock. |
+| "I'll scaffold a small Manna app to prototype this." | No second runtime. Extend Urbot. |
+| "I'll model the entity in Manna first." | Urbot owns the domain model; extend its `domain/`. |
+| "The bot README says `urbot.persona`, so I'll use it." | Source wins. Use `urbot.chat.persona` and friends. |
+| "I'll create a separate bot artifact." | Bots live in `src/main/java/com/embabel/bot/<botname>/`. |
+| "I'll add a UI to review changes." | No UI. Review the Git diff/PR. |
+| "I'll wire the write endpoint now and add approvals later." | Approval is part of the tool contract. |
+| "I'll skip tool side effects; it's read-only." | Every tool declares side effects; omission is a failure. |
+| "I'll move the deprecated files to `legacy/` while I'm here." | Not this change. Mark only; the move is separate. |
+| "I'll half-rename the skills." | Keep manifests, routes, and modes in sync; rename as one unit. |
+| "Tests need a live LLM, so I'll skip them." | Use contract tests that need no LLM; tag live evals `integration`. |
 
 ### 11. Deliver a structured report
-End every task with: capability slice id, files created/changed, tools and side effects, domain/graph/memory
-changes, checks (spec/compile/test/eval), assumptions, and what needs human review. No silent truncation.
+End every task with: routed Urbot flow, files created/changed, tools and side effects, domain/graph/resource
+changes, checks (inspect/compile/test/eval), assumptions, and what needs human review. No silent truncation.
 
 ---
 
 **Layered model:** Instructions (this file) → Skills (`skills/`) → Workflows (`workflows/`) → Policies
-(`policies/`) → Shared contracts (`shared/`) → Generator (`generator/`) → Evals (`evals/`).
+(`policies/`) → Shared contracts (`shared/`) → Generator (`generator/`, deprecated) → Evals (`evals/`).

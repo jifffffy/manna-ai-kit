@@ -1,78 +1,193 @@
 # Manna AI Kit
 
-**Domain-anchored, agent-delivered, spec-driven generation and evolution of headless Embabel services.**
+**A natural-language development orchestrator for Urbot.**
 
-Manna turns a domain + requirement into a **vertical capability slice**: agent, tools, domain, Neo4j,
-DICE-style memory, data pipeline, transport and evals. It is built for projects that keep growing —
-not for one-shot code dumps.
+Urbot decides **how to develop**. Manna decides **which development flow a request takes**. Manna routes a
+request to a Urbot development workflow, inspects the authoritative Urbot source, and applies the smallest
+reviewable change. It is **not** an application generator and does **not** own a runtime or a domain model.
 
-> No UI. No admin backend. **Domain + Neo4j relations are the design anchor; Agent + Tools are the runtime
-> core.** Each capability is delivered as a vertical slice.
+Authoritative Urbot repository: <https://github.com/jifffffy/urbot>
+
+> No UI. No admin backend. Urbot owns the runtime, configuration, and domain. Review happens in Git.
 
 ---
 
 ## What it is
 
-- A **kit** of skills, workflows, policies, schemas and eval contracts.
-- A **deterministic generator** that scaffolds a compiling headless service and its slices.
-- An **evolution method** for adding or modifying capabilities without letting the architecture drift.
+- A **routing layer**: intent → Urbot development flow → skills and checkpoints.
+- A **workflow kit** for inspecting Urbot, planning a change, applying it, and verifying it.
+- A **policy and eval spine** (tool safety, modes, golden routing evals) re-scoped to Urbot.
 
-It is inspired by the engineering practices of `penpot-ai-kit` and the agent patterns of `impromptu`,
-but it deliberately drops Vaadin and every admin surface.
+It is **not**:
 
----
-
-## The design in one picture
+- a second Spring Boot application,
+- a second domain model,
+- a project generator (the old generator is deprecated; see [Asset disposition](#asset-disposition)).
 
 ```text
-Requirement
-  → Capability spec (goal, acceptance, non-goals, design mode)
-  → Domain slice (only the subgraph this capability needs)
-  → Neo4j relation contract (labels, directions, cardinality, queries)
-  → Agent + Actions (operate on the anchored domain)
-  → Tools (atomic / composite / subagent; side effects, approvals, idempotency)
-  → DICE memory (projected onto the same relation vocabulary)
-  → Pipeline (file-based ingest + review)
-  → Transport (REST + SSE; CLI/MCP on demand)
-  → Evals (contract + integration + behavior)
+User request
+  → Intent router
+  → Urbot development flow (first bot / add / modify / tool / memory / pipeline / verify / release)
+  → Inspect authoritative Urbot source
+  → Plan the smallest change
+  → Apply inside the Urbot source tree
+  → Verify with contract tests and evals
+  → Review as a Git diff / PR
 ```
-
-Each capability is generated as a complete **vertical slice**. The domain slice is anchored and
-registered in `.manna/domain.json`; tools are designed against it, never the other way around.
 
 ---
 
 ## Quick start
 
-Requirements: Node >= 22, Java 21, Docker (for Neo4j). Generated projects include the Maven Wrapper.
+Requirements: Node >= 22. The kit itself has no npm dependencies; do not run `npm install`.
 
 ```bash
 npm run validate
 npm test
-
-# Generate a project from a spec
-node generator/manna.mjs init examples/example.spec.json /tmp/session-scout
-cd /tmp/session-scout
-docker compose up -d
-./mvnw test
-./mvnw spring-boot:run
+npm run check:positioning
 ```
 
-Add a capability:
+Compile the legacy generated example (deprecated path, needs JDK 21+ and network):
 
 ```bash
-node generator/manna.mjs slice /tmp/session-scout examples/save-to-agenda.slice.json
-node generator/manna.mjs validate /tmp/session-scout
+npm run test:compile
 ```
 
-Validate the kit:
+The target CLI is specified but not implemented yet:
 
 ```bash
-npm run validate
-npm run lock:check
-npm test
-npm run test:compile   # needs Java 21; compiles the generated example
+manna urbot init --repo https://github.com/jifffffy/urbot --ref <ref> --dir <dir>
+manna urbot inspect --repo https://github.com/jifffffy/urbot --ref <ref> --project <dir> --request "<nl>"
 ```
+
+Only these two commands are in scope for the repositioning. Later changes add `plan`, `apply`, and
+verification commands.
+
+---
+
+## Urbot is the only source of truth
+
+Resolve every question from the Urbot repository, in this order:
+
+1. `pom.xml`
+2. `src/main/java/com/embabel/urbot/`
+3. `src/main/java/com/embabel/bot/<botname>/`
+4. `application-<profile>.properties`
+5. `src/main/resources/prompts/`
+6. `src/test/`
+7. Git history
+
+Prose is fallible metadata. If source and prose disagree, **source wins**. In particular, the old
+`src/main/java/com/embabel/bot/README.md` lags the code.
+
+---
+
+## Urbot extension model
+
+Add a bot inside Urbot, not beside it:
+
+```text
+src/main/java/com/embabel/bot/<botname>/
+├── <BotName>Configuration.java
+├── <BotName>Tools.java
+├── <BotName>Agent.java
+└── domain/
+
+src/main/resources/
+├── application-<botname>.properties
+└── prompts/
+    ├── personas/<botname>.jinja
+    ├── objectives/<botname>.jinja
+    └── behaviours/<botname>.jinja
+```
+
+See `docs/architecture.md` for the full extension-model and CLI contract.
+
+---
+
+## Configuration is source-first
+
+`UrbotProperties.java`, `ChatbotOptions.java`, `application.yml`, and the actual
+`application-<profile>.properties` are authoritative. The names in
+`src/main/java/com/embabel/bot/README.md` are **obsolete**: `urbot.persona`, `urbot.objective`,
+`urbot.max-words`, `urbot.chat-llm.model`.
+
+Use the current bindings:
+
+```properties
+urbot.bot-packages=com.embabel.bot.<botname>
+urbot.chat.persona=<botname>
+urbot.chat.objective=<botname>
+urbot.chat.behaviour=default
+urbot.chat.max-words=80
+urbot.chat.llm.model=gpt-4.1-mini
+urbot.chat.llm.temperature=0.0
+```
+
+---
+
+## Asset disposition
+
+### Retain (re-scoped to Urbot)
+
+- `skills/manna-router` routing architecture → Urbot intent router.
+- `workflows/routing/pipeline.json` entrypoint / `skillRoutes` / `triggers` structure.
+- `scripts/dev/validate-kit.mjs`.
+- `skills.json`, `.well-known/agent-skills/index.json`, `.claude-plugin/plugin.json`.
+- `policies/modes.json`, `policies/tool-safety.md`, kit-level `skills.lock`.
+- `evals/golden/*` golden routing eval mechanism.
+- The skills/workflow Markdown document format.
+
+### Rewrite (current → Urbot)
+
+| Current | Target |
+|---------|--------|
+| `manna-router` | Urbot intent router |
+| `manna-discovery` | `urbot-discovery` |
+| `manna-tools` | `urbot-tool` |
+| `manna-domain` + `manna-graph` + `manna-memory` | `urbot-domain-memory` |
+| `manna-agent` | merged into `urbot-profile` or `urbot-tool` |
+| `manna-evals` | `urbot-verification` |
+| `manna-pipeline` | `urbot-pipeline` (id finalized later) |
+| `manna-transport` | `urbot-transport` (id finalized later) |
+| `manna-release` | `urbot-release` (id finalized later) |
+| `workflows/requirement-to-slice.md` | first Urbot bot capability |
+| `workflows/feature-add.md` | add a bot capability |
+| `workflows/feature-modify.md` | modify a bot capability |
+| `workflows/tool-integration.md` | integrate an Urbot tool |
+| `workflows/memory-tuning.md` | tune bot memory |
+| `workflows/data-pipeline.md` | Urbot data pipeline |
+| `workflows/quality-gate.md` | Urbot verification gate |
+| `workflows/release.md` | version and release Urbot |
+| `AGENTS.md` | Urbot-authoritative instructions |
+
+### Deprecate (mark only — do not delete or move yet)
+
+- `templates/agent-core/`.
+- Generator commands `init`, `slice`, `validate`, `lock`.
+- `shared/schemas/project-spec.schema.json`, `capability-spec.schema.json`, `graph-schema.schema.json`,
+  `memory-schema.schema.json`, `pipeline-schema.schema.json`.
+- `.manna/domain.json`, `.manna/project.spec.json`, generated-project `.manna/lock.json`.
+- `project.designMode`.
+- `F-001` capability IDs.
+
+The physical move to `legacy/` belongs to a later change.
+
+---
+
+## Core invariants
+
+1. **Urbot is the only runtime and domain authority.** No second Spring Boot application, no second model.
+2. **Source wins over prose.** The source inventory above is authoritative.
+3. **Headless.** REST/SSE plus optional CLI/MCP. No UI, no admin backend.
+4. **Every tool declares side effects.** External writes are idempotent and approved; destructive actions are
+   never auto-applied.
+5. **Review in Git.** Changes are diffs and pull requests, not admin screens.
+6. **Smallest change, verified.** Inspect → plan → apply → compile/test/eval, one logical step at a time.
+7. **Deprecations are marked, not deleted.** The `legacy/` move is a separate change.
+8. **Secrets in env only.**
+
+See `policies/tool-safety.md`, `workflows/routing/pipeline.json`, and `docs/architecture.md`.
 
 ---
 
@@ -81,112 +196,27 @@ npm run test:compile   # needs Java 21; compiles the generated example
 ```text
 manna-ai-kit/
 ├── AGENTS.md                  # repo + shipped instruction layer
-├── skills/                    # 11 task skills
-├── workflows/                 # 8 end-to-end workflows + routing
+├── skills/                    # 11 skills (being rewritten to Urbot names)
+├── workflows/                 # 8 workflows + routing
 ├── policies/                  # modes, tool safety, approval checkpoints
-├── shared/
-│   ├── schemas/               # capability, tool, domain, graph, memory, pipeline, transport
-│   └── patterns/              # domain-anchored design, Embabel, Neo4j, DICE, pipeline, transport, Java
-├── templates/agent-core/      # headless Spring Boot + Embabel core
-├── generator/                 # deterministic CLI + validators
-├── examples/                  # example project + slices
-├── evals/golden/              # agent behavior evals
-└── scripts/dev/               # validate, lock, generator test
+├── shared/                    # patterns, schemas, report schemas
+├── templates/agent-core/      # DEPRECATED generated runtime
+├── generator/                 # DEPRECATED deterministic generator
+├── examples/                  # DEPRECATED generated example + slices
+├── evals/golden/              # golden routing evals (retained)
+├── scripts/dev/               # validate, lock, positioning check, generator test
+└── openspec/                  # change proposals and specs
 ```
-
----
-
-## Core invariants
-
-1. **Headless.** No Vaadin, no admin UI, no theme service.
-2. **Domain-anchored.** The domain slice and Neo4j relation contract are designed before the agent and
-   tools. Tools map to canonical entities; they never invent their own types.
-3. **Every tool declares `side_effects`.** External writes are idempotent or dry-run; destructive tools
-   require explicit approval.
-4. **Spec is the source of truth.** `.manna/project.spec.json` and feature specs drive the code.
-5. **Deterministic generator.** `generator/` never calls an LLM.
-6. **Vertical slices.** A slice has agent, tools, domain, graph, memory, pipeline, transport and evals —
-   with explicit `enabled: false` + reason where a vertical does not apply.
-7. **One canonical domain.** `.manna/domain.json` is the entity/relation registry. The validator rejects
-   forking an entity into another slice package or using one relationship type with two shapes.
-8. **Review without admin.** CSV/JSONL + Git + CLI.
-9. **Secrets in env only.**
-
-See `shared/patterns/generation-invariants.md` and `policies/tool-safety.md`.
-
----
-
-## What the generator produces
-
-For the example project:
-
-```text
-session-scout/
-├── pom.xml
-├── docker-compose.yml
-├── .env.example
-├── src/main/java/dev/manna/session/
-│   ├── MannaApplication.java
-│   ├── conversation/        # REST + SSE, in-memory sessions
-│   ├── config/              # Chatbot + API-key filter
-│   └── findsessions/
-│       ├── domain/          # Session, Speaker + repositories (anchored first)
-│       ├── FindSessionsAgent.java
-│       └── FindSessionsTools.java
-├── src/main/resources/cypher/F-001.cypher
-├── src/main/resources/prompts/find-sessions_system.jinja
-├── .manna/
-│   ├── project.spec.json
-│   ├── features/F-001.spec.json
-│   ├── evals/F-001.eval.json
-│   ├── domain.json          # canonical entity/relation registry
-│   ├── state.json
-│   └── lock.json
-└── docs/capabilities/F-001.md
-```
-
-The core compiles with Spring Boot + Embabel. Generated tool bodies are safe stubs (`not implemented
-yet`) so a slice cannot silently perform an external write before the workflow implements it.
-
----
-
-## Workflows
-
-| Workflow | Purpose |
-|----------|---------|
-| `requirement-to-slice` | New project or first capability |
-| `feature-add` | Add a capability without regressions |
-| `feature-modify` | Change behaviour with impact analysis |
-| `tool-integration` | Add an API/MCP/write tool safely |
-| `memory-tuning` | Tune DICE propositions and recall |
-| `data-pipeline` | Add CSV/JSONL ingest, review and apply |
-| `quality-gate` | Spec → compile → tests → evals → safety |
-| `release` | Version, lock, changelog, publish |
-
-Each workflow names its checkpoints. Approval is per checkpoint, never for a vague "looks good".
-
----
-
-## Why this design
-
-- **Removing Vaadin** removes the largest, least deterministic generation surface and makes CI
-  deterministic.
-- **Removing admin** moves human review to files + Git, which is auditable and diff-friendly.
-- **Domain-anchored** prevents tool-driven entity fragmentation while keeping the modeled subgraph small.
-- **Vertical slices** make every capability independently compilable and testable.
-- **Spec + lock** make repeated AI edits reviewable and prevent silent drift.
 
 ---
 
 ## Honest limitations
 
-- The generated project is a **walking skeleton**, not a finished product. Tool adapters, DICE wiring and
-  real graph writes are completed by the workflows with human review.
-- Behavior evals need a live LLM and are therefore marked `integration`; they are not deterministic.
-- Cross-slice relations are declared but not generated until the target slice exists (they appear as a
-  code comment).
-- The generator supports one stack by design: Java 21 + Spring Boot + Embabel + Neo4j.
-- No UI generation by design. If a client needs a UI, build it separately against the REST/SSE surface.
+- The `manna urbot` commands are specified but **not implemented** in this change.
+- The skills and workflows still carry Manna names and generator-era content; the rewrite lands in a later
+  change.
+- The generator and generated example remain in the tree but are deprecated; they are not the product.
+- Behavior evals need a live LLM and are tagged `integration`; they are not deterministic.
 
 ---
 
