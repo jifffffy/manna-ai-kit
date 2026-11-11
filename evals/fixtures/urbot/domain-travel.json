@@ -1,0 +1,66 @@
+{
+  "boundedContext": "Travel Planning",
+  "ubiquitousLanguage": ["Trip", "Traveler", "Destination", "Itinerary", "DateRange"],
+  "classes": [
+    {
+      "name": "Trip",
+      "color": "moment-interval",
+      "dddVariant": "aggregate-root",
+      "description": "A planned journey",
+      "attributes": [
+        { "name": "startDate", "type": "LocalDate" },
+        { "name": "endDate", "type": "LocalDate" }
+      ],
+      "relationships": [
+        { "name": "traveler", "target": "Traveler", "cardinality": "one" },
+        { "name": "destinations", "target": "Destination", "cardinality": "many" }
+      ],
+      "invariants": ["endDate must not be before startDate"]
+    },
+    {
+      "name": "Traveler",
+      "color": "role",
+      "dddVariant": "entity",
+      "description": "A person planning a trip",
+      "attributes": [{ "name": "displayName", "type": "String" }],
+      "relationships": [],
+      "invariants": []
+    },
+    {
+      "name": "Destination",
+      "color": "party-place-thing",
+      "dddVariant": "entity",
+      "description": "A place to visit",
+      "attributes": [{ "name": "country", "type": "String" }],
+      "relationships": [],
+      "invariants": []
+    },
+    {
+      "name": "Itinerary",
+      "color": "description",
+      "dddVariant": "value-object",
+      "description": "An ordered plan for a trip",
+      "attributes": [{ "name": "notes", "type": "String" }],
+      "relationships": [],
+      "invariants": ["notes must not be blank"]
+    },
+    {
+      "name": "DateRange",
+      "color": "milled",
+      "dddVariant": "value-object",
+      "description": "Inclusive travel dates",
+      "attributes": [
+        { "name": "start", "type": "LocalDate" },
+        { "name": "end", "type": "LocalDate" }
+      ],
+      "relationships": [],
+      "invariants": ["end must not be before start"]
+    }
+  ],
+  "events": [
+    { "name": "TripPlanned", "fields": [{ "name": "tripId", "type": "String" }] }
+  ],
+  "services": [
+    { "name": "TripPlanningService", "description": "Plans trips across aggregates" }
+  ]
+}

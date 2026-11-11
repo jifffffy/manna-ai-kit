@@ -1,25 +1,28 @@
 # Workflow: Urbot Domain and Memory
 
-**Goal:** add NamedEntity, relation, or memory behavior inside a Urbot bot.
+**Goal:** add memory propositions, projections, or recall behavior inside an existing Urbot bot domain.
 
-## Phase 1 scope
+## Scope
 
-Skeleton only. Inspect and report a domain/memory plan; do not write.
+Memory only. Domain discovery and DDD implementation belong to `urbot-domain-design` and run as a separate
+workflow.
 
 ## Ordered steps
 
-1. Run `urbot-discovery` to read existing `domain/` types.
-2. Reuse an existing type before adding a new one.
-3. State the entity, relations, and memory propositions.
-4. Output the target domain files and verification commands.
-5. Stop at `CHECKPOINT: DOMAIN MEMORY PLAN`.
+1. Run `urbot-discovery` to read existing `domain/` types and the memory configuration.
+2. If the domain model is missing, stop and route to `urbot-domain-design` first; do not design the domain here.
+3. Reuse an existing type before adding a proposition or projection.
+4. State the memory artifacts, recall policy, and verification commands.
+5. Stop at `CHECKPOINT: MEMORY`.
+6. Apply memory changes after approval and verify with `urbot-verification`.
 
 ## Output
 
-A plan that keeps the entity model inside the Urbot bot package.
+A memory plan that keeps propositions, projections, and recall inside the Urbot bot package.
 
 ## Do not
 
+- Design entities, aggregates, value objects, or events here.
 - Copy the domain model into Manna.
 - Fork an entity into a second package.
-- Write files in Phase 1.
+- Run domain design and memory as one unbounded flow.

@@ -8,6 +8,7 @@ const errors = [];
 
 const URBOT_SKILLS = [
   "urbot-discovery",
+  "urbot-domain-design",
   "urbot-domain-memory",
   "urbot-profile",
   "urbot-prompt",
@@ -18,6 +19,7 @@ const URBOT_SKILLS = [
 
 const URBOT_WORKFLOWS = [
   "urbot-bootstrap.md",
+  "urbot-domain-design.md",
   "urbot-domain-memory.md",
   "urbot-profile-change.md",
   "urbot-prompt-tuning.md",
@@ -120,12 +122,12 @@ checkEquals(Object.keys(modes.skillModes ?? {}).sort(), [...URBOT_SKILLS].sort()
 const routing = readJson("workflows/routing/pipeline.json");
 checkEquals(
   routing.entrypoints.map((entry) => entry.id).sort(),
-  ["urbot-bootstrap", "urbot-domain-memory", "urbot-profile-change", "urbot-prompt-tuning", "urbot-tool-development", "urbot-verification"],
+  ["urbot-bootstrap", "urbot-domain-design", "urbot-domain-memory", "urbot-profile-change", "urbot-prompt-tuning", "urbot-tool-development", "urbot-verification"],
   "pipeline entrypoints"
 );
 checkEquals(
   Object.keys(routing.skillRoutes ?? {}).sort(),
-  ["urbot-discovery", "urbot-domain-memory", "urbot-profile", "urbot-prompt", "urbot-tool", "urbot-verification"],
+  ["urbot-discovery", "urbot-domain-design", "urbot-domain-memory", "urbot-profile", "urbot-prompt", "urbot-tool", "urbot-verification"],
   "pipeline skillRoutes"
 );
 

@@ -28,7 +28,7 @@ CI is `validate` → `lock:check` → `test`. Run all three before calling work 
 
 ### Urbot-only main path
 The retired generator, templates, schemas, examples, tests, and all `manna-*` skills/workflows have been
-deleted. The main path is Urbot-only: `generator/manna.mjs`, `generator/urbot/`, the seven `urbot-*` skills,
+deleted. The main path is Urbot-only: `generator/manna.mjs`, `generator/urbot/`, the eight `urbot-*` skills,
 the six `urbot-*` workflows, and the retained orchestration spine. Do not reintroduce a legacy path.
 
 ### Adding or renaming a skill
@@ -84,10 +84,12 @@ The skill set is Urbot-only. Add `urbot-*` skills and keep `skills.json`, `.well
 
 #### Urbot-only assets
 - `skills/urbot-router`, `skills/urbot-discovery`, `skills/urbot-profile`, `skills/urbot-tool`,
-  `skills/urbot-domain-memory`, `skills/urbot-prompt`, `skills/urbot-verification`.
+  `skills/urbot-domain-design`, `skills/urbot-domain-memory`, `skills/urbot-prompt`,
+  `skills/urbot-verification`.
 - `workflows/urbot-bootstrap.md`, `workflows/urbot-profile-change.md`,
   `workflows/urbot-prompt-tuning.md`, `workflows/urbot-tool-development.md`,
-  `workflows/urbot-domain-memory.md`, `workflows/urbot-verification.md`.
+  `workflows/urbot-domain-design.md`, `workflows/urbot-domain-memory.md`,
+  `workflows/urbot-verification.md`.
 
 #### Deleted
 - `legacy/` (the retired generator, templates, examples, schemas, tests, and old golden evals).
@@ -183,6 +185,15 @@ beans in a `@Configuration @Profile("<bot>")` class in the bot package; `ChatAct
 External writes need an idempotency key or dry-run plus approval; destructive tools are never auto-applied.
 Stop at `CHECKPOINT: TOOLS`, apply with `skills/urbot-tool/scripts/apply.mjs --approve`, and verify with the
 generated tests plus `./mvnw test`. If the tool needs a new entity, relation, or memory behavior, stop and run
+`urbot-domain-design` separately, then `urbot-domain-memory` if memory behavior is needed.
+
+### 3.3 Domain design uses color modeling and DDD
+A domain change runs `urbot-domain-design` after `urbot-discovery`: classify candidates with Java Modeling in
+Color (pink moment-interval, yellow role, green party/place/thing, blue description, milled attributes), map
+the colors to DDD, and stop at `CHECKPOINT: DOMAIN`. Entities and aggregate roots are `NamedEntity` interfaces
+in the bot `domain/` package; value objects and events are records; persistence uses
+`NamedEntityDataRepository`; add `urbot.memory.entity-packages=com.embabel.bot.<bot>`. Apply with
+`skills/urbot-domain-design/scripts/apply.mjs --approve`, verify with `./mvnw test`, and hand memory to
 `urbot-domain-memory` separately.
 
 ### 4. Configuration is source-first

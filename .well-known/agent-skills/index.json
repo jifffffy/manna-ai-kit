@@ -2,12 +2,45 @@
   "schemaVersion": "1.0",
   "version": "0.1.0",
   "skills": [
-    { "name": "urbot-router", "version": "0.1.0", "path": "skills/urbot-router/SKILL.md" },
-    { "name": "urbot-discovery", "version": "0.1.0", "path": "skills/urbot-discovery/SKILL.md" },
-    { "name": "urbot-profile", "version": "0.1.0", "path": "skills/urbot-profile/SKILL.md" },
-    { "name": "urbot-tool", "version": "0.1.0", "path": "skills/urbot-tool/SKILL.md" },
-    { "name": "urbot-domain-memory", "version": "0.1.0", "path": "skills/urbot-domain-memory/SKILL.md" },
-    { "name": "urbot-prompt", "version": "0.1.0", "path": "skills/urbot-prompt/SKILL.md" },
-    { "name": "urbot-verification", "version": "0.1.0", "path": "skills/urbot-verification/SKILL.md" }
+    {
+      "name": "urbot-router",
+      "version": "0.1.0",
+      "path": "skills/urbot-router/SKILL.md"
+    },
+    {
+      "name": "urbot-discovery",
+      "version": "0.1.0",
+      "path": "skills/urbot-discovery/SKILL.md"
+    },
+    {
+      "name": "urbot-profile",
+      "version": "0.1.0",
+      "path": "skills/urbot-profile/SKILL.md"
+    },
+    {
+      "name": "urbot-tool",
+      "version": "0.1.0",
+      "path": "skills/urbot-tool/SKILL.md"
+    },
+    {
+      "name": "urbot-domain-design",
+      "version": "0.1.0",
+      "path": "skills/urbot-domain-design/SKILL.md"
+    },
+    {
+      "name": "urbot-domain-memory",
+      "version": "0.1.0",
+      "path": "skills/urbot-domain-memory/SKILL.md"
+    },
+    {
+      "name": "urbot-prompt",
+      "version": "0.1.0",
+      "path": "skills/urbot-prompt/SKILL.md"
+    },
+    {
+      "name": "urbot-verification",
+      "version": "0.1.0",
+      "path": "skills/urbot-verification/SKILL.md"
+    }
   ]
 }

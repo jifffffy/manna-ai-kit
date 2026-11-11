@@ -44,6 +44,16 @@ export const ROUTE_DETAILS = {
     ],
     verificationCommands: DEFAULT_COMMANDS
   },
+  "urbot-domain-design": {
+    skills: ["urbot-discovery", "urbot-domain-design", "urbot-verification"],
+    targetFiles: [
+      "src/main/java/com/embabel/bot/<botname>/domain/",
+      "src/main/java/com/embabel/bot/<botname>/domain/events/",
+      "src/test/java/com/embabel/bot/<botname>/domain/",
+      "src/main/resources/application-<botname>.properties"
+    ],
+    verificationCommands: DEFAULT_COMMANDS
+  },
   "urbot-domain-memory": {
     skills: ["urbot-discovery", "urbot-domain-memory"],
     targetFiles: [
@@ -64,6 +74,7 @@ export const ROUTE_IDS = Object.keys(ROUTE_DETAILS);
 const INTENT_WORDS = {
   prompt: ["persona", "objective", "behaviour", "behavior", "prompt", "人格", "目标", "行为", "提示词"],
   tool: ["tool", "toolishrag", "mcp", "subagent", "reference", "integrate", "external api", "webhook", "工具", "接入", "子代理"],
+  domainDesign: ["domain model", "domain design", "color modeling", "color-modeling", "ddd", "domain-driven", "bounded context", "aggregate", "领域模型", "领域设计", "领域驱动", "聚合"],
   domainMemory: ["namedentity", "named entity", "relation", "memory", "domain", "实体", "关系", "记忆", "领域"],
   profile: ["profile"],
   verification: ["test", "compile", "regression", "verify", "verification", "build", "测试", "编译", "回归", "验证"]
@@ -75,17 +86,19 @@ export function routeRequest({ directoryExists, request, discovery = {} }) {
   const text = String(request ?? "").toLowerCase();
   const matches = [];
   const profileCreation = isProfileCreation(text);
+  const domainDesign = hasAny(text, INTENT_WORDS.domainDesign);
   if (isBootstrap(text)) matches.push("urbot-bootstrap");
   if (!profileCreation && hasAny(text, INTENT_WORDS.prompt)) matches.push("urbot-prompt-tuning");
   if (hasAny(text, INTENT_WORDS.tool)) matches.push("urbot-tool-development");
-  if (hasAny(text, INTENT_WORDS.domainMemory)) matches.push("urbot-domain-memory");
+  if (domainDesign) matches.push("urbot-domain-design");
+  if (!domainDesign && hasAny(text, INTENT_WORDS.domainMemory)) matches.push("urbot-domain-memory");
   if (profileCreation || hasAny(text, INTENT_WORDS.profile)) matches.push("urbot-profile-change");
   if (hasAny(text, INTENT_WORDS.verification)) matches.push("urbot-verification");
 
   const unique = [...new Set(matches)];
   if (unique.length === 0) {
     return question(
-      "Which Urbot change do you want: bootstrap, profile, prompt, tool, domain/memory, or verification?"
+      "Which Urbot change do you want: bootstrap, profile, prompt, tool, domain design, domain/memory, or verification?"
     );
   }
   if (unique.length > 1) {

@@ -131,8 +131,8 @@ Every tool declares one side effect in the Manna plan — `read`, `internal-writ
 `destructive` — plus any secret environment variable. External writes require idempotency or dry-run plus
 approval and are generated as dry-run stubs; destructive tools are never auto-applied. The workflow stops at
 `CHECKPOINT: TOOLS`, applies with `skills/urbot-tool/scripts/apply.mjs --approve`, generates tests, and verifies
-with `./mvnw -DskipTests compile` and `./mvnw test`. Domain or memory changes route to `urbot-domain-memory` as
-a separate workflow.
+with `./mvnw -DskipTests compile` and `./mvnw test`. Domain changes route to `urbot-domain-design`; memory
+changes route to `urbot-domain-memory` as separate workflows.
 
 Examples: "增加天气查询工具", "接入 Stripe", "增加 MCP 工具", "添加一个 Subagent".
 
@@ -174,10 +174,12 @@ urbot.chat.llm.temperature=0.0
 ### Urbot-only assets
 
 - `skills/urbot-router`, `skills/urbot-discovery`, `skills/urbot-profile`, `skills/urbot-tool`,
-  `skills/urbot-domain-memory`, `skills/urbot-prompt`, `skills/urbot-verification`.
+  `skills/urbot-domain-design`, `skills/urbot-domain-memory`, `skills/urbot-prompt`,
+  `skills/urbot-verification`.
 - `workflows/urbot-bootstrap.md`, `workflows/urbot-profile-change.md`,
   `workflows/urbot-prompt-tuning.md`, `workflows/urbot-tool-development.md`,
-  `workflows/urbot-domain-memory.md`, `workflows/urbot-verification.md`.
+  `workflows/urbot-domain-design.md`, `workflows/urbot-domain-memory.md`,
+  `workflows/urbot-verification.md`.
 
 ### Deleted
 
@@ -214,8 +216,8 @@ See `policies/tool-safety.md`, `workflows/routing/pipeline.json`, and `docs/arch
 ```text
 manna-ai-kit/
 ├── AGENTS.md                  # repo + shipped instruction layer
-├── skills/                    # 7 Urbot skills (router + 6 workflows skills)
-├── workflows/                 # 6 Urbot workflows + routing
+├── skills/                    # 8 Urbot skills (router + 7 workflow skills)
+├── workflows/                 # 7 Urbot workflows + routing
 ├── policies/                  # modes, tool safety, approval checkpoints
 ├── shared/                    # SKILL-template.md (document format)
 ├── generator/                 # Urbot CLI (manna.mjs + urbot/)
@@ -228,9 +230,8 @@ manna-ai-kit/
 
 ## Honest limitations
 
-- `manna urbot init` and `manna urbot inspect` are read-only. The Phase 2 profile and Phase 3 tool workflows
-  are the mutation paths and write only after their checkpoints; domain and memory workflows remain
-  skeletons.
+- `manna urbot init` and `manna urbot inspect` are read-only. The profile, tool, and domain-design workflows
+  are the mutation paths and write only after their checkpoints; memory remains a skeleton.
 - The retired generator, templates, schemas, examples, tests, and all `manna-*` skills/workflows have been
   deleted; the main path is Urbot-only.
 - Behavior evals need a live LLM and are tagged `integration`; they are not deterministic.

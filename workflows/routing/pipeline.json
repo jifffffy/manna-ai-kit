@@ -68,6 +68,26 @@
       ]
     },
     {
+      "id": "urbot-domain-design",
+      "title": "Discover and implement a Urbot domain with color modeling and DDD",
+      "workflow": "workflows/urbot-domain-design.md",
+      "skills": [
+        "urbot-discovery",
+        "urbot-domain-design",
+        "urbot-verification"
+      ],
+      "triggers": [
+        "domain model",
+        "domain design",
+        "color modeling",
+        "DDD",
+        "bounded context",
+        "\u9886\u57df\u6a21\u578b",
+        "\u9886\u57df\u8bbe\u8ba1",
+        "\u805a\u5408"
+      ]
+    },
+    {
       "id": "urbot-domain-memory",
       "title": "Add NamedEntity, relations, or memory behavior",
       "workflow": "workflows/urbot-domain-memory.md",
@@ -105,6 +125,7 @@
     "urbot-profile": "urbot-profile-change",
     "urbot-prompt": "urbot-prompt-tuning",
     "urbot-tool": "urbot-tool-development",
+    "urbot-domain-design": "urbot-domain-design",
     "urbot-domain-memory": "urbot-domain-memory",
     "urbot-verification": "urbot-verification"
   }

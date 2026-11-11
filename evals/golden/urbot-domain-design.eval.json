@@ -1,0 +1,16 @@
+{
+  "id": "urbot-domain-design",
+  "workflow": "urbot-domain-design",
+  "fixture": "evals/fixtures/urbot/domain-design.json",
+  "expected": {
+    "must_detect": ["color modeling intent", "DDD intent", "domain design intent"],
+    "must_create": [],
+    "must_do": ["select urbot-domain-design", "report the color model and DDD model"],
+    "must_not": ["create a second repository", "write memory propositions", "create a second domain model"]
+  },
+  "pass_criteria": "fixture routes to urbot-domain-design",
+  "triggers": {
+    "should": ["design the domain", "color modeling", "DDD"],
+    "should_not": ["add a tool", "tune the persona"]
+  }
+}

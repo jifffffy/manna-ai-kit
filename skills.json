@@ -30,6 +30,13 @@
       "description": "Generate a Urbot Tool, LlmReference, ToolishRag, Subagent, or MCP connection with explicit side effects, secrets, and tests."
     },
     {
+      "name": "urbot-domain-design",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/urbot-domain-design",
+      "description": "Discover a Urbot bot domain with Java Modeling in Color and implement it with DDD."
+    },
+    {
       "name": "urbot-domain-memory",
       "version": "0.1.0",
       "mode": "review",

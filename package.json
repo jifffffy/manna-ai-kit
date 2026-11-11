@@ -15,7 +15,8 @@
     "test:routing": "node scripts/dev/test-routing.mjs",
     "test:profile": "node scripts/dev/test-profile-change.mjs",
     "test:tool": "node scripts/dev/test-tool-development.mjs",
-    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/check-urbot-only.mjs && node scripts/dev/test-routing.mjs && node scripts/dev/test-profile-change.mjs && node scripts/dev/test-tool-development.mjs"
+    "test:domain": "node scripts/dev/test-domain-design.mjs",
+    "test": "node scripts/dev/check-positioning.mjs && node scripts/dev/check-urbot-only.mjs && node scripts/dev/test-routing.mjs && node scripts/dev/test-profile-change.mjs && node scripts/dev/test-tool-development.mjs && node scripts/dev/test-domain-design.mjs"
   },
   "files": [
     "AGENTS.md",

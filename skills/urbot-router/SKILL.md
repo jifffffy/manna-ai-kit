@@ -35,6 +35,7 @@ not perform the change itself.
 | New/modified profile | `urbot-profile-change` |
 | Persona/objective/behaviour change | `urbot-prompt-tuning` |
 | Add Tool/MCP/Subagent/Reference | `urbot-tool-development` |
+| Discover/model a domain (color modeling + DDD) | `urbot-domain-design` |
 | Add NamedEntity/Relations/Memory | `urbot-domain-memory` |
 | Test/compile/regression | `urbot-verification` |
 

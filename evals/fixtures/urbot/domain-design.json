@@ -1,0 +1,5 @@
+{
+  "directoryExists": true,
+  "request": "Design the travel domain with color modeling and DDD",
+  "discovery": { "targetProfile": "travel" }
+}
