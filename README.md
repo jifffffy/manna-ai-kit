@@ -53,15 +53,15 @@ Compile the legacy generated example (deprecated path, needs JDK 21+ and network
 npm run test:compile
 ```
 
-The target CLI is specified but not implemented yet:
+Phase 1 provides a read-only inspect-and-route CLI:
 
 ```bash
-manna urbot init --repo https://github.com/jifffffy/urbot --ref <ref> --dir <dir>
-manna urbot inspect --repo https://github.com/jifffffy/urbot --ref <ref> --project <dir> --request "<nl>"
+manna urbot init --repo https://github.com/jifffffy/urbot --ref <ref> --dir <dir> [--write-state]
+manna urbot inspect --repo https://github.com/jifffffy/urbot --ref <ref> --project <dir> --request "<nl>" [--write-state]
 ```
 
-Only these two commands are in scope for the repositioning. Later changes add `plan`, `apply`, and
-verification commands.
+`init` pins a shallow checkout and prints the resolved commit. `inspect` reads the project and routes the
+request without modifying it. Later changes add `plan`, `apply`, and real modification workflows.
 
 ---
 
@@ -161,6 +161,12 @@ urbot.chat.llm.temperature=0.0
 | `workflows/release.md` | version and release Urbot |
 | `AGENTS.md` | Urbot-authoritative instructions |
 
+Phase 1 Urbot assets (new): `skills/urbot-discovery`, `skills/urbot-profile`, `skills/urbot-tool`,
+`skills/urbot-domain-memory`, `skills/urbot-prompt`, `skills/urbot-verification`,
+`workflows/urbot-bootstrap.md`, `workflows/urbot-profile-change.md`, `workflows/urbot-prompt-tuning.md`,
+`workflows/urbot-tool-development.md`, `workflows/urbot-domain-memory.md`,
+`workflows/urbot-verification.md`.
+
 ### Deprecate (mark only — do not delete or move yet)
 
 - `templates/agent-core/`.
@@ -196,12 +202,12 @@ See `policies/tool-safety.md`, `workflows/routing/pipeline.json`, and `docs/arch
 ```text
 manna-ai-kit/
 ├── AGENTS.md                  # repo + shipped instruction layer
-├── skills/                    # 11 skills (being rewritten to Urbot names)
-├── workflows/                 # 8 workflows + routing
+├── skills/                    # 17 skills (6 Urbot Phase 1 + 11 legacy)
+├── workflows/                 # 14 workflows (6 Urbot Phase 1) + routing
 ├── policies/                  # modes, tool safety, approval checkpoints
 ├── shared/                    # patterns, schemas, report schemas
 ├── templates/agent-core/      # DEPRECATED generated runtime
-├── generator/                 # DEPRECATED deterministic generator
+├── generator/                 # DEPRECATED generator + Phase 1 urbot CLI
 ├── examples/                  # DEPRECATED generated example + slices
 ├── evals/golden/              # golden routing evals (retained)
 ├── scripts/dev/               # validate, lock, positioning check, generator test
@@ -212,9 +218,10 @@ manna-ai-kit/
 
 ## Honest limitations
 
-- The `manna urbot` commands are specified but **not implemented** in this change.
-- The skills and workflows still carry Manna names and generator-era content; the rewrite lands in a later
-  change.
+- `manna urbot init` and `manna urbot inspect` are implemented **read-only** in Phase 1; they do not modify
+  Urbot or implement a modification workflow.
+- The older `manna-*` skills and workflows still carry generator-era content; the full rewrite lands in a
+  later change.
 - The generator and generated example remain in the tree but are deprecated; they are not the product.
 - Behavior evals need a live LLM and are tagged `integration`; they are not deterministic.
 

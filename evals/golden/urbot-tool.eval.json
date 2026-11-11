@@ -1,0 +1,16 @@
+{
+  "id": "urbot-tool",
+  "workflow": "urbot-tool-development",
+  "fixture": "evals/fixtures/urbot/tool.json",
+  "expected": {
+    "must_detect": ["tool intent", "MCP intent"],
+    "must_create": [],
+    "must_do": ["select urbot-tool-development", "report the tool contract and target files"],
+    "must_not": ["invent a second domain model", "add an external write without approval"]
+  },
+  "pass_criteria": "fixture routes to urbot-tool-development",
+  "triggers": {
+    "should": ["add an MCP tool", "integrate an external API"],
+    "should_not": ["change the objective", "run regression tests"]
+  }
+}

@@ -28,7 +28,13 @@
     "manna-pipeline": "review",
     "manna-transport": "review",
     "manna-evals": "review",
-    "manna-release": "suggest"
+    "manna-release": "suggest",
+    "urbot-discovery": "suggest",
+    "urbot-profile": "review",
+    "urbot-tool": "review",
+    "urbot-domain-memory": "review",
+    "urbot-prompt": "review",
+    "urbot-verification": "suggest"
   },
   "safeSet": [
     "formatting and import cleanup inside a generated slice",

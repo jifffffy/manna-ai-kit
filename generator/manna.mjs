@@ -3,6 +3,7 @@ import path from "node:path";
 import { addSlice, initProject } from "./lib/generate.mjs";
 import { validateProject } from "./lib/validate.mjs";
 import { writeProjectLock } from "./lib/lock.mjs";
+import { runUrbotCommand } from "./urbot/index.mjs";
 
 const [command, ...args] = process.argv.slice(2);
 
@@ -10,6 +11,10 @@ function usage() {
   console.log(`manna-ai-kit
 
 Usage:
+  manna urbot init --repo <url> --ref <ref> --dir <dir> [--write-state]
+  manna urbot inspect --repo <url> --ref <ref> --project <dir> --request "<natural language request>" [--write-state]
+
+Deprecated:
   manna init <spec.json> <out-dir>
   manna slice <project-dir> <slice.spec.json>
   manna validate <project-dir>
@@ -19,6 +24,12 @@ Usage:
 
 try {
   switch (command) {
+    case "urbot": {
+      const [subcommand, ...rest] = args;
+      const result = runUrbotCommand(subcommand, rest);
+      console.log(JSON.stringify(result, null, 2));
+      break;
+    }
     case "init": {
       requireArgs(args, 2, "manna init <spec.json> <out-dir>");
       const result = initProject(path.resolve(args[0]), path.resolve(args[1]));

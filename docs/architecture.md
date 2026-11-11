@@ -47,24 +47,25 @@ Configuration follows the same rule: `UrbotProperties.java`, `ChatbotOptions.jav
 the actual `application-<profile>.properties` are authoritative. The legacy names `urbot.persona`,
 `urbot.objective`, `urbot.max-words`, and `urbot.chat-llm.model` are obsolete.
 
-## Minimal CLI (target surface)
-
-Only two commands are in scope for the repositioning:
+## Minimal CLI (Phase 1: read-only)
 
 ```bash
 manna urbot init \
   --repo https://github.com/jifffffy/urbot \
   --ref <ref> \
-  --dir <dir>
+  --dir <dir> \
+  [--write-state]
 
 manna urbot inspect \
   --repo https://github.com/jifffffy/urbot \
   --ref <ref> \
   --project <dir> \
-  --request "<natural language request>"
+  --request "<natural language request>" \
+  [--write-state]
 ```
 
-They are specified but not implemented yet. Later changes add `plan`, `apply`, and verification commands.
+`init` records the resolved commit. `inspect` reads the project and routes the request without writing to it.
+State writing is opt-in and gitignored. Later changes add `plan`, `apply`, and real modification workflows.
 
 ## Orchestration flow
 

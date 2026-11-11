@@ -1,0 +1,16 @@
+{
+  "id": "urbot-bootstrap",
+  "workflow": "urbot-bootstrap",
+  "fixture": "evals/fixtures/urbot/bootstrap.json",
+  "expected": {
+    "must_detect": ["missing target directory", "new bot intent"],
+    "must_create": [],
+    "must_do": ["select urbot-bootstrap", "print the route and target files"],
+    "must_not": ["modify the Urbot project", "copy the domain model", "create a second project spec"]
+  },
+  "pass_criteria": "fixture routes to urbot-bootstrap and the default inspect path writes no files",
+  "triggers": {
+    "should": ["create a new Urbot bot", "bootstrap a Urbot project"],
+    "should_not": ["fix a typo", "rename a variable"]
+  }
+}

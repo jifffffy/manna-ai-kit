@@ -1,0 +1,8 @@
+{
+  "directoryExists": true,
+  "request": "Add a new profile for billing",
+  "discovery": {
+    "profiles": ["scheduler"],
+    "targetProfile": "billing"
+  }
+}

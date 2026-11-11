@@ -1,0 +1,8 @@
+{
+  "directoryExists": true,
+  "request": "Add an MCP tool for calendar lookup",
+  "discovery": {
+    "profiles": ["scheduler"],
+    "targetProfile": "scheduler"
+  }
+}

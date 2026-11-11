@@ -1,0 +1,16 @@
+{
+  "id": "urbot-domain-memory",
+  "workflow": "urbot-domain-memory",
+  "fixture": "evals/fixtures/urbot/domain-memory.json",
+  "expected": {
+    "must_detect": ["NamedEntity intent", "memory intent"],
+    "must_create": [],
+    "must_do": ["select urbot-domain-memory", "reuse existing domain types before adding"],
+    "must_not": ["copy the domain model into Manna", "fork an entity into a second package"]
+  },
+  "pass_criteria": "fixture routes to urbot-domain-memory",
+  "triggers": {
+    "should": ["add a NamedEntity", "add a memory proposition"],
+    "should_not": ["add an MCP tool", "change the persona"]
+  }
+}

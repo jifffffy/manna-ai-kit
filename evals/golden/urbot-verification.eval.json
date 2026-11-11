@@ -1,0 +1,16 @@
+{
+  "id": "urbot-verification",
+  "workflow": "urbot-verification",
+  "fixture": "evals/fixtures/urbot/verification.json",
+  "expected": {
+    "must_detect": ["verification intent", "regression intent"],
+    "must_create": [],
+    "must_do": ["select urbot-verification", "report compile and test commands"],
+    "must_not": ["modify source", "claim a check passed without running it"]
+  },
+  "pass_criteria": "fixture routes to urbot-verification and no source is modified",
+  "triggers": {
+    "should": ["run the regression tests", "does it compile"],
+    "should_not": ["add a profile", "add a tool"]
+  }
+}

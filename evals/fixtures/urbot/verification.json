@@ -1,0 +1,8 @@
+{
+  "directoryExists": true,
+  "request": "Run the compile and regression tests",
+  "discovery": {
+    "profiles": ["scheduler"],
+    "targetProfile": "scheduler"
+  }
+}

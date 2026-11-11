@@ -106,6 +106,15 @@ current `manna-*` directories, manifests, modes, and routes in sync; do not half
 - `workflows/data-pipeline.md` → Urbot data pipeline.
 - `workflows/quality-gate.md` → Urbot verification gate.
 - `workflows/release.md` → version and release Urbot.
+- `skills/urbot-discovery`, `skills/urbot-profile`, `skills/urbot-tool`,
+  `skills/urbot-domain-memory`, `skills/urbot-prompt`, `skills/urbot-verification` → Phase 1 Urbot skill
+  skeletons (only discovery is implemented read-only).
+- `workflows/urbot-bootstrap.md` → new project or bot bootstrap.
+- `workflows/urbot-profile-change.md` → add or modify a bot profile.
+- `workflows/urbot-prompt-tuning.md` → tune persona, objective, or behaviour.
+- `workflows/urbot-tool-development.md` → add a Tool, MCP tool, subagent, or reference.
+- `workflows/urbot-domain-memory.md` → add NamedEntity, relations, or memory.
+- `workflows/urbot-verification.md` → compile, test, and regression verification.
 
 #### Deprecate (mark only — do not delete or move yet)
 - `templates/agent-core/`.
@@ -118,21 +127,24 @@ current `manna-*` directories, manifests, modes, and routes in sync; do not half
 
 The physical move to `legacy/` belongs to a later change.
 
-### Minimal CLI (target surface)
+### Minimal CLI (Phase 1: read-only)
 ```bash
 manna urbot init \
   --repo https://github.com/jifffffy/urbot \
   --ref <ref> \
-  --dir <dir>
+  --dir <dir> \
+  [--write-state]
 
 manna urbot inspect \
   --repo https://github.com/jifffffy/urbot \
   --ref <ref> \
   --project <dir> \
-  --request "<natural language request>"
+  --request "<natural language request>" \
+  [--write-state]
 ```
-Only these two commands are in scope for the repositioning. Later changes add `plan`, `apply`, and
-verification commands. The commands are specified here but not implemented yet.
+`init` clones shallowly and prints the resolved commit. `inspect` reads the project and routes the request
+without writing to it. Later changes add `plan`, `apply`, and real modification workflows. State writing is
+opt-in and goes to a gitignored `.manna-run/`.
 
 Canonical references: `shared/SKILL-template.md`, `shared/patterns/domain-anchored-design.md`,
 `shared/patterns/embabel-patterns.md`, `shared/patterns/generation-invariants.md`, `shared/schemas/`,
@@ -240,4 +252,5 @@ changes, checks (inspect/compile/test/eval), assumptions, and what needs human r
 ---
 
 **Layered model:** Instructions (this file) → Skills (`skills/`) → Workflows (`workflows/`) → Policies
-(`policies/`) → Shared contracts (`shared/`) → Generator (`generator/`, deprecated) → Evals (`evals/`).
+(`policies/`) → Shared contracts (`shared/`) → Generator (`generator/`, deprecated) plus the Phase 1
+`generator/urbot/` CLI → Evals (`evals/`).

@@ -77,6 +77,48 @@
       "mode": "suggest",
       "path": "skills/manna-release",
       "description": "Version, lock, verify and package a manna-generated project."
+    },
+    {
+      "name": "urbot-discovery",
+      "version": "0.1.0",
+      "mode": "suggest",
+      "path": "skills/urbot-discovery",
+      "description": "Inspect a Urbot checkout read-only and report project, source, commit, profiles, prompts, domain types, and tools."
+    },
+    {
+      "name": "urbot-profile",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/urbot-profile",
+      "description": "Plan and review a new or modified Urbot bot profile without writing in Phase 1."
+    },
+    {
+      "name": "urbot-tool",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/urbot-tool",
+      "description": "Plan a Urbot Tool, MCP tool, subagent, or reference with explicit side effects and approval."
+    },
+    {
+      "name": "urbot-domain-memory",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/urbot-domain-memory",
+      "description": "Plan NamedEntity, relation, and memory changes inside a Urbot bot domain package."
+    },
+    {
+      "name": "urbot-prompt",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/urbot-prompt",
+      "description": "Plan persona, objective, and behaviour prompt changes for a Urbot bot."
+    },
+    {
+      "name": "urbot-verification",
+      "version": "0.1.0",
+      "mode": "suggest",
+      "path": "skills/urbot-verification",
+      "description": "Report Urbot project state and verification commands without modifying source in Phase 1."
     }
   ]
 }

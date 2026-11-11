@@ -19,7 +19,13 @@
     "skills/manna-pipeline",
     "skills/manna-transport",
     "skills/manna-evals",
-    "skills/manna-release"
+    "skills/manna-release",
+    "skills/urbot-discovery",
+    "skills/urbot-profile",
+    "skills/urbot-tool",
+    "skills/urbot-domain-memory",
+    "skills/urbot-prompt",
+    "skills/urbot-verification"
   ],
   "commands": []
 }

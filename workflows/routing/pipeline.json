@@ -148,6 +148,101 @@
         "publish",
         "\u53d1\u5e03"
       ]
+    },
+    {
+      "id": "urbot-bootstrap",
+      "title": "Bootstrap a new Urbot project or bot",
+      "workflow": "workflows/urbot-bootstrap.md",
+      "skills": [
+        "urbot-discovery",
+        "urbot-profile"
+      ],
+      "triggers": [
+        "new project",
+        "new bot",
+        "bootstrap",
+        "\u521b\u5efa\u9879\u76ee",
+        "\u65b0\u5efa bot"
+      ]
+    },
+    {
+      "id": "urbot-profile-change",
+      "title": "Add or modify a Urbot bot profile",
+      "workflow": "workflows/urbot-profile-change.md",
+      "skills": [
+        "urbot-discovery",
+        "urbot-profile"
+      ],
+      "triggers": [
+        "new profile",
+        "modify profile",
+        "\u65b0\u589e profile",
+        "\u4fee\u6539 profile"
+      ]
+    },
+    {
+      "id": "urbot-prompt-tuning",
+      "title": "Tune a bot persona, objective, or behaviour",
+      "workflow": "workflows/urbot-prompt-tuning.md",
+      "skills": [
+        "urbot-discovery",
+        "urbot-prompt"
+      ],
+      "triggers": [
+        "persona",
+        "objective",
+        "behaviour",
+        "\u4eba\u8bbe",
+        "\u76ee\u6807"
+      ]
+    },
+    {
+      "id": "urbot-tool-development",
+      "title": "Add a Tool, MCP tool, subagent, or reference",
+      "workflow": "workflows/urbot-tool-development.md",
+      "skills": [
+        "urbot-discovery",
+        "urbot-tool"
+      ],
+      "triggers": [
+        "tool",
+        "MCP",
+        "subagent",
+        "\u5de5\u5177",
+        "\u63a5\u5165\u5de5\u5177"
+      ]
+    },
+    {
+      "id": "urbot-domain-memory",
+      "title": "Add NamedEntity, relations, or memory behavior",
+      "workflow": "workflows/urbot-domain-memory.md",
+      "skills": [
+        "urbot-discovery",
+        "urbot-domain-memory"
+      ],
+      "triggers": [
+        "NamedEntity",
+        "relation",
+        "memory",
+        "\u9886\u57df\u5b9e\u4f53",
+        "\u8bb0\u5fc6"
+      ]
+    },
+    {
+      "id": "urbot-verification",
+      "title": "Verify, compile, or run regression checks",
+      "workflow": "workflows/urbot-verification.md",
+      "skills": [
+        "urbot-discovery",
+        "urbot-verification"
+      ],
+      "triggers": [
+        "test",
+        "compile",
+        "regression",
+        "\u9a8c\u8bc1",
+        "\u56de\u5f52"
+      ]
     }
   ],
   "skillRoutes": {
@@ -160,6 +255,12 @@
     "manna-pipeline": "data-pipeline",
     "manna-transport": "tool-integration",
     "manna-evals": "quality-gate",
-    "manna-release": "release"
+    "manna-release": "release",
+    "urbot-discovery": "urbot-bootstrap",
+    "urbot-profile": "urbot-profile-change",
+    "urbot-prompt": "urbot-prompt-tuning",
+    "urbot-tool": "urbot-tool-development",
+    "urbot-domain-memory": "urbot-domain-memory",
+    "urbot-verification": "urbot-verification"
   }
 }
