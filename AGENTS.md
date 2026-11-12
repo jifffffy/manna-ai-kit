@@ -21,8 +21,9 @@ The kit has **zero npm dependencies** — do not run `npm install`; the scripts 
 - `npm run lock:check` — CI's stale-lock check (compares the digest, not `generatedAt`).
 - `npm run check:positioning` — asserts the Urbot positioning and asset inventory stay consistent.
 - `npm run check:urbot-only` — asserts the main path is Urbot-only and no legacy assets or references remain.
-- `npm test` — runs `check:positioning`, `check:urbot-only`, the routing evals, the profile check, and the
-  tool check.
+- `npm run test:init` — checks the one-step init defaults, tag selection, reuse, routing, and read-only path.
+- `npm test` — runs `check:positioning`, `check:urbot-only`, the routing evals, the profile check, the tool
+  check, the domain-design check, and the one-step init check.
 
 CI is `validate` → `lock:check` → `test`. Run all three before calling work done.
 
@@ -102,7 +103,19 @@ The skill set is Urbot-only. Add `urbot-*` skills and keep `skills.json`, `.well
 
 The main path is Urbot-only; do not reintroduce a deleted asset.
 
-### Minimal CLI (Phase 1: read-only)
+### CLI
+The primary path is one step:
+
+```bash
+manna init "<natural language request>"
+```
+
+It uses `https://github.com/jifffffy/urbot`, the latest semver tag (falling back to `main`), and `./urbot`
+(reused when present). It is read-only: it prints the source record and the selected workflow and does not
+apply it. Optional overrides: `--repo`, `--ref`, `--dir`, `--write-state`.
+
+The explicit commands remain:
+
 ```bash
 manna urbot init \
   --repo https://github.com/jifffffy/urbot \
@@ -117,9 +130,9 @@ manna urbot inspect \
   --request "<natural language request>" \
   [--write-state]
 ```
-`init` clones shallowly and prints the resolved commit. `inspect` reads the project and routes the request
-without writing to it. Later changes add `plan`, `apply`, and real modification workflows. State writing is
-opt-in and goes to a gitignored `.manna-run/`.
+`urbot init` clones shallowly and prints the resolved commit. `urbot inspect` reads the project and routes the
+request without writing to it. The profile, tool, and domain-design workflows are the write paths; they run
+separately after their checkpoints. State writing is opt-in and goes to a gitignored `.manna-run/`.
 
 Canonical references: `shared/SKILL-template.md`, `policies/tool-safety.md`,
 `workflows/routing/pipeline.json`, and `docs/architecture.md`.

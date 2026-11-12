@@ -86,7 +86,10 @@ export function routeRequest({ directoryExists, request, discovery = {} }) {
   const text = String(request ?? "").toLowerCase();
   const matches = [];
   const profileCreation = isProfileCreation(text);
-  const domainDesign = hasAny(text, INTENT_WORDS.domainDesign);
+  const domainDesign =
+    hasAny(text, INTENT_WORDS.domainDesign) ||
+    /\b(design|model|discover)\b[^.]*\bdomain\b/.test(text) ||
+    /(设计|建模|发现)[^。]*领域/.test(text);
   if (isBootstrap(text)) matches.push("urbot-bootstrap");
   if (!profileCreation && hasAny(text, INTENT_WORDS.prompt)) matches.push("urbot-prompt-tuning");
   if (hasAny(text, INTENT_WORDS.tool)) matches.push("urbot-tool-development");

@@ -52,15 +52,29 @@ npm run check:urbot-only
 > **Urbot-only:** the retired generator, templates, schemas, examples, and all `manna-*` skills/workflows have
 > been deleted. The main path contains only the Urbot orchestration and its retained spine.
 
-Phase 1 provides a read-only inspect-and-route CLI:
+One-step init uses the fixed Urbot template and routes your request:
+
+```bash
+manna init "design the travel domain"
+```
+
+- repository: `https://github.com/jifffffy/urbot`
+- ref: the latest semver tag, falling back to `main`
+- checkout: `./urbot`, reused when it already exists
+- read-only: it prints the source record and the selected workflow; it does not apply the workflow
+
+Optional overrides: `--repo`, `--ref`, `--dir`, and `--write-state`.
+
+The explicit read-only commands remain available:
 
 ```bash
 manna urbot init --repo https://github.com/jifffffy/urbot --ref <ref> --dir <dir> [--write-state]
 manna urbot inspect --repo https://github.com/jifffffy/urbot --ref <ref> --project <dir> --request "<nl>" [--write-state]
 ```
 
-`init` pins a shallow checkout and prints the resolved commit. `inspect` reads the project and routes the
-request without modifying it. Later changes add `plan`, `apply`, and real modification workflows.
+`urbot init` pins a shallow checkout and prints the resolved commit. `urbot inspect` reads the project and
+routes the request without modifying it. The profile, tool, and domain-design workflows are the write paths;
+they run separately after their checkpoints.
 
 ---
 

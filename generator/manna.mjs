@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 import { runUrbotCommand } from "./urbot/index.mjs";
+import { runSimpleInit } from "./urbot/simple-init.mjs";
 
 const [command, ...args] = process.argv.slice(2);
 
 function usage() {
-  console.log(`manna-ai-kit
+  console.log(`manna
 
 Usage:
+  manna init "<natural language request>" [--repo <url>] [--ref <ref>] [--dir <dir>] [--write-state]
   manna urbot init --repo <url> --ref <ref> --dir <dir> [--write-state]
   manna urbot inspect --repo <url> --ref <ref> --project <dir> --request "<natural language request>" [--write-state]
 `);
@@ -14,6 +16,11 @@ Usage:
 
 try {
   switch (command) {
+    case "init": {
+      const result = runSimpleInit(args);
+      console.log(JSON.stringify(result, null, 2));
+      break;
+    }
     case "urbot": {
       const [subcommand, ...rest] = args;
       const result = runUrbotCommand(subcommand, rest);

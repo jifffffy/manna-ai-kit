@@ -47,7 +47,19 @@ Configuration follows the same rule: `UrbotProperties.java`, `ChatbotOptions.jav
 the actual `application-<profile>.properties` are authoritative. The legacy names `urbot.persona`,
 `urbot.objective`, `urbot.max-words`, and `urbot.chat-llm.model` are obsolete.
 
-## Minimal CLI (Phase 1: read-only)
+## CLI (read-only entry points)
+
+The primary path is one step:
+
+```bash
+manna init "<natural language request>"
+```
+
+It uses the fixed `https://github.com/jifffffy/urbot` repository, the latest semver tag (falling back to
+`main`), and `./urbot` (reused when present). It prints the source record and the selected workflow and does not
+apply it. Optional overrides: `--repo`, `--ref`, `--dir`, `--write-state`.
+
+The explicit commands remain:
 
 ```bash
 manna urbot init \
@@ -64,8 +76,9 @@ manna urbot inspect \
   [--write-state]
 ```
 
-`init` records the resolved commit. `inspect` reads the project and routes the request without writing to it.
-State writing is opt-in and gitignored. Later changes add `plan`, `apply`, and real modification workflows.
+`urbot init` records the resolved commit. `urbot inspect` reads the project and routes the request without
+writing to it. The profile, tool, and domain-design workflows are the write paths and run separately after
+their checkpoints. State writing is opt-in and gitignored.
 
 ## Orchestration flow
 

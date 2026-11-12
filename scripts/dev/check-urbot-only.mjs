@@ -133,8 +133,13 @@ checkEquals(
 
 const cli = read("generator/manna.mjs");
 check(cli.includes("runUrbotCommand"), "main CLI must dispatch urbot");
-for (const legacyCase of ['case "init"', 'case "slice"', 'case "validate"', 'case "lock"', '"./lib']) {
+check(cli.includes("runSimpleInit"), "main CLI must dispatch the simplified init");
+check(cli.includes('case "init"'), "main CLI must expose init");
+for (const legacyCase of ['case "slice"', 'case "validate"', 'case "lock"', '"./lib']) {
   check(!cli.includes(legacyCase), `main CLI still contains ${legacyCase}`);
+}
+for (const legacyImport of ["initProject", "addSlice", "validateProject", "writeProjectLock"]) {
+  check(!cli.includes(legacyImport), `main CLI still imports ${legacyImport}`);
 }
 
 const lockScript = read("scripts/dev/update-lock.mjs");
