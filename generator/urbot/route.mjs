@@ -77,7 +77,33 @@ const INTENT_WORDS = {
   domainDesign: ["domain model", "domain design", "color modeling", "color-modeling", "ddd", "domain-driven", "bounded context", "aggregate", "领域模型", "领域设计", "领域驱动", "聚合"],
   domainMemory: ["namedentity", "named entity", "relation", "memory", "domain", "实体", "关系", "记忆", "领域"],
   profile: ["profile"],
-  verification: ["test", "compile", "regression", "verify", "verification", "build", "测试", "编译", "回归", "验证"]
+  verification: [
+    "test",
+    "compile",
+    "regression",
+    "verify",
+    "verification",
+    "build",
+    "run urbot",
+    "run the urbot",
+    "run the app",
+    "run the application",
+    "start urbot",
+    "start the urbot",
+    "start the app",
+    "start the application",
+    "launch urbot",
+    "launch the app",
+    "测试",
+    "编译",
+    "回归",
+    "验证",
+    "构建",
+    "运行 urbot",
+    "运行项目",
+    "启动 urbot",
+    "启动项目"
+  ]
 };
 
 export function routeRequest({ directoryExists, request, discovery = {} }) {

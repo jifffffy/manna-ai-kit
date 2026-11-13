@@ -55,7 +55,7 @@
       "version": "0.1.0",
       "mode": "suggest",
       "path": "skills/urbot-verification",
-      "description": "Report Urbot project state and verification commands without modifying source."
+      "description": "Report Urbot project state and build, run, test, and verification commands without modifying source."
     }
   ]
 }

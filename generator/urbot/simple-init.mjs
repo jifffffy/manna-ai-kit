@@ -1,16 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import { initCommand, URBOT_REPO } from "./init.mjs";
-import { inspectCommand } from "./inspect.mjs";
 import { writeStateFile } from "./state.mjs";
 import { gitOrNull } from "./git.mjs";
-import { copyWorkspaceKit, DEFAULT_WORKSPACE, KIT_ROOT } from "./workspace.mjs";
+import { copyWorkspaceKit, KIT_ROOT, WORKSPACE_ENTRY } from "./workspace.mjs";
 
 export const DEFAULT_BRANCH = "main";
 
-const USAGE = [
-  'manna init "<request>" [--workspace <dir>] [--repo <url>] [--ref <ref>] [--dir <dir>] [--write-state] [--force]'
-];
+const USAGE = ["manna init <project> [--repo <url>] [--ref <ref>] [--write-state]"];
 
 export function resolveDefaultRef(repo) {
   const output = gitOrNull(["ls-remote", "--tags", repo]);
@@ -33,44 +30,47 @@ export function resolveDefaultRef(repo) {
 }
 
 export function runSimpleInit(args) {
-  const { request, options } = parseArgs(args);
+  const { project, options } = parseArgs(args);
   if (options.help) return { usage: USAGE };
-  if (!request) {
+  if (!project) {
     throw new Error(
-      'Usage: manna init "<request>" [--workspace <dir>] [--repo <url>] [--ref <ref>] [--dir <dir>] [--write-state] [--force]'
+      'Usage: manna init <project> [--repo <url>] [--ref <ref>] [--write-state]'
     );
   }
 
-  const workspace = path.resolve(options.workspace);
+  const workspace = path.resolve(project);
   if (workspace === KIT_ROOT) {
-    throw new Error("Workspace must not be the Manna kit root");
+    throw new Error("Project must not be the Manna kit root");
   }
-  const dir = path.resolve(options.dir ?? path.join(workspace, "urbot"));
 
-  const kit = copyWorkspaceKit(workspace, { checkout: dir, force: options.force });
-  const source = ensureSource({ dir, repo: options.repo, ref: options.ref, writeState: options.writeState });
-  const inspection = inspectCommand({
-    project: dir,
-    request,
-    repo: source.repository,
+  const source = ensureSource({
+    dir: workspace,
+    repo: options.repo,
+    ref: options.ref,
     writeState: options.writeState
   });
+  const kit = copyWorkspaceKit(workspace);
 
-  return { workspace, kit, source, inspection };
+  return {
+    workspace,
+    kit,
+    source,
+    entry: WORKSPACE_ENTRY,
+    next: `Open ${workspace} in OpenCode to start work`
+  };
 }
 
 function ensureSource({ dir, repo, ref, writeState }) {
-  const exists = fs.existsSync(dir);
   let source;
 
-  if (exists) {
+  if (fs.existsSync(dir)) {
     const stat = fs.statSync(dir);
     if (!stat.isDirectory()) {
-      throw new Error(`Target path is not a directory: ${dir}`);
+      throw new Error(`Project path is not a directory: ${dir}`);
     }
     if (fs.readdirSync(dir).length > 0) {
       if (!isUrbotCheckout(dir)) {
-        throw new Error(`Target directory is not a Urbot checkout: ${dir}`);
+        throw new Error(`Project directory is not a Urbot checkout: ${dir}`);
       }
       source = {
         repository: gitOrNull(["-C", dir, "remote", "get-url", "origin"]) ?? repo,
@@ -103,12 +103,16 @@ function ensureSource({ dir, repo, ref, writeState }) {
   }
 
   if (writeState) {
-    writeStateFile("source.json", {
-      repository: source.repository,
-      requestedRef: source.requestedRef,
-      resolvedCommit: source.resolvedCommit,
-      fetchedAt: source.fetchedAt
-    });
+    writeStateFile(
+      "source.json",
+      {
+        repository: source.repository,
+        requestedRef: source.requestedRef,
+        resolvedCommit: source.resolvedCommit,
+        fetchedAt: source.fetchedAt
+      },
+      dir
+    );
   }
 
   return source;
@@ -129,8 +133,8 @@ function detectCurrentRef(dir) {
 }
 
 function parseArgs(args) {
-  const options = { repo: URBOT_REPO, workspace: DEFAULT_WORKSPACE };
-  let request = null;
+  const options = { repo: URBOT_REPO };
+  let project = null;
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
@@ -142,18 +146,14 @@ function parseArgs(args) {
       options.writeState = true;
       continue;
     }
-    if (arg === "--force") {
-      options.force = true;
-      continue;
-    }
     if (!arg.startsWith("--")) {
-      if (request !== null) throw new Error(`Unexpected argument: ${arg}`);
-      request = arg;
+      if (project !== null) throw new Error(`Unexpected argument: ${arg}`);
+      project = arg;
       continue;
     }
 
     const key = arg.slice(2);
-    if (!["repo", "ref", "dir", "workspace"].includes(key)) {
+    if (!["repo", "ref"].includes(key)) {
       throw new Error(`Unknown option: --${key}`);
     }
     const value = args[index + 1];
@@ -164,7 +164,7 @@ function parseArgs(args) {
     index += 1;
   }
 
-  return { request, options };
+  return { project, options };
 }
 
 function compareParts(a, b) {

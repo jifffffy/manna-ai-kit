@@ -47,20 +47,21 @@ Configuration follows the same rule: `UrbotProperties.java`, `ChatbotOptions.jav
 the actual `application-<profile>.properties` are authoritative. The legacy names `urbot.persona`,
 `urbot.objective`, `urbot.max-words`, and `urbot.chat-llm.model` are obsolete.
 
-## CLI (read-only entry points)
+## CLI entry points
 
 The primary path is one step:
 
 ```bash
-manna init "<natural language request>"
+manna init <project>
 ```
 
-It creates the workspace in the current working directory (or `--workspace <dir>`) with a local copy of the
+It resolves the project directory and makes it both the Urbot checkout and the Manna workspace: the directory
+is cloned when missing or empty, reused when it is already a Urbot checkout, and rejected otherwise. The local
 kit (`AGENTS.md`, `.opencode/`, `skills/`, `workflows/`, `policies/`, `shared/`, `docs/`, `generator/`,
-`openspec/`) and the fixed Urbot checkout at `./urbot` (reused when present). Open that directory in OpenCode
-to use the local skills and commands. The command prints the workspace, copied kit, source record, and selected workflow, and does not
-apply the workflow. Optional overrides: `--workspace`, `--repo`, `--ref`, `--dir` (Urbot checkout),
-`--write-state`, and `--force` (refresh the copied kit).
+`openspec/`) is then copied into the project root, overwriting kit-owned files; the Urbot `AGENTS.md` is
+replaced by the Manna-owned file. Open that directory in OpenCode to use the local skills and commands. The
+command prints the workspace, copied kit, source record, entry point, and next step. Optional overrides:
+`--repo`, `--ref`, and `--write-state`.
 
 The explicit commands remain:
 

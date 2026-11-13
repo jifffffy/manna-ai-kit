@@ -115,6 +115,13 @@
         "test",
         "compile",
         "regression",
+        "build",
+        "run urbot",
+        "start urbot",
+        "run the app",
+        "\u6784\u5efa",
+        "\u8fd0\u884c urbot",
+        "\u542f\u52a8 urbot",
         "\u9a8c\u8bc1",
         "\u56de\u5f52"
       ]

@@ -52,22 +52,23 @@ npm run check:urbot-only
 > **Urbot-only:** the retired generator, templates, schemas, examples, and all `manna-*` skills/workflows have
 > been deleted. The main path contains only the Urbot orchestration and its retained spine.
 
-One-step init creates a self-contained workspace and routes your request:
+`manna init` creates one project directory and fills it with the Urbot checkout plus the Manna kit:
 
 ```bash
-manna init "design the travel domain"
+manna init demo
 ```
 
-- workspace: the current directory (open it in OpenCode)
+- project: `./demo` (open it in OpenCode)
+- Urbot checkout: the project root itself, cloned when missing and reused when present
 - local kit: `skills/`, `workflows/`, `policies/`, `.opencode/`, `generator/`, `openspec/`
-- Urbot checkout: `./urbot`, reused when it already exists
+- `AGENTS.md`: replaced with the Manna-owned file, so exactly one instruction file remains
+- kit copy: existing kit-owned files are overwritten, so re-running refreshes the Manna layer
 - repository: `https://github.com/jifffffy/urbot`
 - ref: the latest semver tag, falling back to `main`
-- read-only for Urbot: it writes the workspace kit copy, prints the source record and selected workflow, and
-  does not apply the workflow
+- read-only for Urbot: it does not modify Urbot source, configuration, or Git history
 
-Optional overrides: `--workspace`, `--dir` (Urbot checkout), `--repo`, `--ref`, `--write-state`, and `--force`
-(refresh the copied kit).
+Optional overrides: `--repo`, `--ref`, and `--write-state`. A missing project name is an error; `--workspace`,
+`--dir`, and `--force` are not part of `init`.
 
 The explicit read-only commands remain available:
 
@@ -82,28 +83,27 @@ they run separately after their checkpoints.
 
 ---
 
-## Self-contained workspace
+## Project workspace
 
-`manna init` copies the local kit into the current working directory and places the fixed Urbot checkout in
-`./urbot` inside it:
+`manna init demo` clones the fixed Urbot repository into `./demo` and copies the local kit into the same
+directory:
 
 ```text
-./
-├── AGENTS.md          # generated consumer entry point
-├── .opencode/         # commands + OpenCode skills
-├── skills/            # local Manna skills
-├── workflows/         # local workflows
+demo/
+├── AGENTS.md           # Manna-owned entry point (replaces the Urbot file)
+├── .opencode/          # commands + OpenCode skills
+├── skills/             # local Manna skills
+├── workflows/          # local workflows
 ├── policies/ shared/ docs/ generator/
-├── openspec/          # config + specs
-└── urbot/             # fixed Urbot checkout
+├── openspec/           # config + specs
+├── pom.xml, mvnw, src/ # Urbot checkout
+└── .git/               # Urbot history
 ```
 
-Open the current directory in OpenCode. The generated `AGENTS.md` points at the local `skills/`, `workflows/`,
-and `./urbot`; `.opencode/skills/` contains OpenCode-discoverable copies of the Manna skills. Use
-`--workspace` for a different root, `--dir` for a checkout outside the workspace, and `--force` to refresh the
-kit snapshot. Existing files are preserved by default; an existing `.gitignore` is extended with
-`.manna-run/` and `urbot/`, and the Manna kit root is rejected as a workspace. The workspace does not copy the
-kit's maintenance tests, lock, package metadata, or OpenSpec change history.
+Open `./demo` in OpenCode. The single `AGENTS.md` carries the Manna flow plus the Urbot build, run, test, and
+gotcha guidance. Kit-owned files are overwritten on every run, so `manna init demo` is also the refresh
+command. Files outside the copy set are left alone, an existing `.gitignore` is not rewritten (`.manna-run/`
+goes to `.git/info/exclude`), and the Manna kit root is rejected as a project.
 
 ---
 
@@ -273,8 +273,8 @@ manna-ai-kit/
 
 ## Honest limitations
 
-- `manna init` creates the workspace kit copy and clones/reuses the Urbot checkout, but does not modify Urbot
-  source. `manna urbot init` and `manna urbot inspect` are read-only. The profile, tool, and domain-design
+- `manna init` creates the project workspace (clone or reuse plus kit copy) and replaces `AGENTS.md`, but does
+  not modify Urbot source or configuration. `manna urbot init` and `manna urbot inspect` are read-only. The profile, tool, and domain-design
   workflows are the Urbot mutation paths and write only after their checkpoints; memory remains a skeleton.
 - The retired generator, templates, schemas, examples, tests, and all `manna-*` skills/workflows have been
   deleted; the main path is Urbot-only.

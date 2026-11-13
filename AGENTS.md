@@ -21,7 +21,8 @@ The kit has **zero npm dependencies** — do not run `npm install`; the scripts 
 - `npm run lock:check` — CI's stale-lock check (compares the digest, not `generatedAt`).
 - `npm run check:positioning` — asserts the Urbot positioning and asset inventory stay consistent.
 - `npm run check:urbot-only` — asserts the main path is Urbot-only and no legacy assets or references remain.
-- `npm run test:init` — checks the one-step init defaults, tag selection, reuse, routing, and read-only path.
+- `npm run test:init` — checks the project init contract, tag selection, clone/reuse, overwrite copy, and the
+  single `AGENTS.md`.
 - `npm test` — runs `check:positioning`, `check:urbot-only`, the routing evals, the profile check, the tool
   check, the domain-design check, and the one-step init check.
 
@@ -107,26 +108,28 @@ The main path is Urbot-only; do not reintroduce a deleted asset.
 The primary path is one step:
 
 ```bash
-manna init "<natural language request>"
+manna init <project>
 ```
 
-It creates a self-contained workspace in the current working directory and copies the local kit into it:
+It creates the project directory as the Urbot checkout, then copies the local kit into the same directory:
 
 ```text
-./
-├── AGENTS.md          # generated consumer entry point
+demo/
+├── AGENTS.md          # Manna-owned entry point (replaces the Urbot file)
 ├── .opencode/         # commands + OpenCode skills
 ├── skills/            # local Manna skills
 ├── workflows/         # local workflows
 ├── policies/ shared/ docs/ generator/
 ├── openspec/          # config + specs
-└── urbot/             # the fixed Urbot checkout
+├── pom.xml, mvnw, src/ # Urbot checkout
+└── .git/              # Urbot history
 ```
 
-It uses `https://github.com/jifffffy/urbot`, the latest semver tag (falling back to `main`), and reuses the
-`urbot/` checkout when present. It is read-only for Urbot: it prints the workspace, copied kit, source record,
-and selected workflow and does not apply the workflow. Optional overrides: `--workspace`, `--repo`, `--ref`,
-`--dir` (Urbot checkout), `--write-state`, and `--force` (refresh the copied kit).
+It uses `https://github.com/jifffffy/urbot` and the latest semver tag (falling back to `main`). The project
+argument is required: the directory is cloned when missing or empty, reused when it is already a Urbot
+checkout, and rejected when it is not. Kit-owned files, including `AGENTS.md`, are overwritten on every run, so
+re-running refreshes the Manna layer. It does not modify Urbot source or configuration, does not route a
+request, and does not apply a workflow. Optional overrides: `--repo`, `--ref`, and `--write-state`.
 
 The explicit commands remain:
 

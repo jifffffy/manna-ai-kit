@@ -3,7 +3,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const KIT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-export const DEFAULT_WORKSPACE = ".";
 
 const COPY_SET = [
   ".opencode",
@@ -22,27 +21,23 @@ const COPY_SET = [
 
 const SKIP_NAMES = new Set([".git", "node_modules", "target", ".DS_Store", ".manna-run"]);
 
-export function copyWorkspaceKit(workspace, options = {}) {
+export const WORKSPACE_ENTRY = "AGENTS.md";
+
+export function copyWorkspaceKit(workspace) {
   const root = path.resolve(workspace);
   if (root === KIT_ROOT) {
-    throw new Error("Workspace must not be the Manna kit root");
+    throw new Error("Project must not be the Manna kit root");
   }
 
   fs.mkdirSync(root, { recursive: true });
   const copied = [];
-  const skipped = [];
 
   for (const relative of COPY_SET) {
     const source = path.join(KIT_ROOT, relative);
     if (!fs.existsSync(source)) {
       throw new Error(`Manna kit is missing ${relative}`);
     }
-    copyTree(source, path.join(root, relative), {
-      workspaceRoot: root,
-      force: Boolean(options.force),
-      copied,
-      skipped
-    });
+    copyTree(source, path.join(root, relative), { workspaceRoot: root, copied });
   }
 
   const skillsRoot = path.join(KIT_ROOT, "skills");
@@ -50,28 +45,13 @@ export function copyWorkspaceKit(workspace, options = {}) {
     if (!entry.isDirectory() || !entry.name.startsWith("urbot-")) continue;
     copyTree(path.join(skillsRoot, entry.name), path.join(root, ".opencode", "skills", entry.name), {
       workspaceRoot: root,
-      force: Boolean(options.force),
-      copied,
-      skipped
+      copied
     });
   }
 
-  const project = relativeProject(root, options.checkout);
-  writeGenerated(
-    root,
-    "AGENTS.md",
-    fs
-      .readFileSync(path.join(KIT_ROOT, "generator/urbot/workspace-agents.md"), "utf8")
-      .replaceAll("{{URBOT_PROJECT}}", project),
-    options.force,
-    copied,
-    skipped
-  );
-
-  const checkoutIgnore = ignorePath(root, options.checkout);
-  ensureGitignore(root, checkoutIgnore, copied, skipped);
-
-  return { copied, skipped };
+  writeEntryPoint(root, copied);
+  ensureRunStateIgnore(root);
+  return { copied };
 }
 
 function copyTree(source, destination, options) {
@@ -88,56 +68,35 @@ function copyTree(source, destination, options) {
   if (!stat.isFile() || SKIP_NAMES.has(path.basename(source))) return;
 
   const relative = path.relative(options.workspaceRoot, destination).split(path.sep).join("/");
-  if (fs.existsSync(destination) && !options.force) {
-    options.skipped.push(relative);
-    return;
-  }
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.copyFileSync(source, destination);
   options.copied.push(relative);
 }
 
-function writeGenerated(root, relative, content, force, copied, skipped) {
-  const destination = path.join(root, relative);
-  if (fs.existsSync(destination) && !force) {
-    skipped.push(relative);
-    return;
-  }
-  fs.mkdirSync(path.dirname(destination), { recursive: true });
+function writeEntryPoint(root, copied) {
+  const destination = path.join(root, WORKSPACE_ENTRY);
+  const content = fs
+    .readFileSync(path.join(KIT_ROOT, "generator/urbot/workspace-agents.md"), "utf8")
+    .replaceAll("{{URBOT_PROJECT}}", ".");
+
+  fs.rmSync(destination, { force: true });
   fs.writeFileSync(destination, content);
-  copied.push(relative);
+  copied.push(WORKSPACE_ENTRY);
 }
 
-function relativeProject(workspace, checkout) {
-  if (!checkout) return "./urbot";
-  const relative = path.relative(workspace, path.resolve(checkout));
-  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
-    return path.resolve(checkout);
-  }
-  return `./${relative.split(path.sep).join("/")}`;
-}
-
-function ignorePath(workspace, checkout) {
-  if (!checkout) return "urbot/";
-  const relative = path.relative(workspace, path.resolve(checkout));
-  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
-    return "urbot/";
-  }
-  return `${relative.split(path.sep).join("/")}/`;
-}
-
-function ensureGitignore(root, checkoutIgnore, copied, skipped) {
-  const destination = path.join(root, ".gitignore");
-  const required = [".DS_Store", ".idea/", "*.iml", "node_modules/", "target/", ".env", ".manna-run/", checkoutIgnore];
-  const existing = fs.existsSync(destination) ? fs.readFileSync(destination, "utf8") : "";
-  const lines = existing.split("\n");
-  const present = new Set(lines.map((line) => line.trim()).filter(Boolean));
-  const missing = required.filter((line) => !present.has(line));
-  if (missing.length === 0) {
-    skipped.push(".gitignore");
+function ensureRunStateIgnore(root) {
+  if (fs.existsSync(path.join(root, ".git"))) {
+    ensureLine(path.join(root, ".git", "info", "exclude"), ".manna-run/");
     return;
   }
+  ensureLine(path.join(root, ".gitignore"), ".manna-run/");
+}
+
+function ensureLine(file, line) {
+  const existing = fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "";
+  const present = existing.split("\n").some((entry) => entry.trim() === line);
+  if (present) return;
+  fs.mkdirSync(path.dirname(file), { recursive: true });
   const prefix = existing.length === 0 ? "" : existing.endsWith("\n") ? existing : `${existing}\n`;
-  fs.writeFileSync(destination, `${prefix}${missing.join("\n")}\n`);
-  copied.push(".gitignore");
+  fs.writeFileSync(file, `${prefix}${line}\n`);
 }
