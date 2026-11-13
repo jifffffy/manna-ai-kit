@@ -182,36 +182,37 @@ workflow.
 ### Requirement: One-step init command
 
 Manna SHALL provide `init "<request>"` as the primary first-run command through the existing `manna` binary.
-The command SHALL use `https://github.com/jifffffy/urbot` by default, SHALL resolve
-an omitted ref to the latest semver tag or `main`, and SHALL default the checkout directory to `./urbot`. It
-SHALL reuse a valid existing Urbot checkout and clone only when the checkout is missing. After the checkout is
-available, it SHALL run the read-only discovery and router and print the source record and selected workflow.
+The command SHALL create or reuse a self-contained workspace (default `./manna-workspace`) containing a local
+copy of the Manna orchestration layer and skills. The Urbot checkout SHALL default to `<workspace>/urbot`,
+using `https://github.com/jifffffy/urbot` and the latest semver tag or `main` when the ref is omitted. The
+command SHALL reuse a valid existing checkout and clone only when it is missing, then run the read-only
+discovery and router. It SHALL print the workspace, copied kit, source record, and selected workflow.
 
 #### Scenario: No flags uses the fixed defaults
 
 - **WHEN** a user runs `manna init "design the travel domain"`
-- **THEN** the command targets `https://github.com/jifffffy/urbot`
-- **AND** resolves the ref and checkout directory from their defaults
-- **AND** prints the source record and the selected workflow
+- **THEN** the workspace is `./manna-workspace`
+- **AND** it contains the local kit and `./manna-workspace/urbot`
+- **AND** the output includes `workspace`, `kit`, `source`, and `inspection`
 
 #### Scenario: Existing checkout is reused
 
-- **WHEN** `./urbot` already contains a valid Urbot checkout and the user runs `init "<request>"`
-- **THEN** the command reuses that checkout
+- **WHEN** the workspace and its `urbot/` checkout already exist
+- **THEN** the command reuses both
 - **AND** does not clone again
 - **AND** still runs discovery and routing for the request
 
 #### Scenario: Missing checkout is initialized
 
-- **WHEN** the default checkout directory is missing
-- **THEN** the command clones the fixed repository at the resolved ref
+- **WHEN** the workspace exists but its Urbot checkout is missing
+- **THEN** the command clones the fixed repository at the resolved ref into `<workspace>/urbot`
 - **AND** records and prints the resolved commit
 
 #### Scenario: Advanced overrides remain optional
 
-- **WHEN** the user supplies `--repo`, `--ref`, `--dir`, or `--write-state`
+- **WHEN** the user supplies `--workspace`, `--dir`, `--repo`, `--ref`, `--write-state`, or `--force`
 - **THEN** the command honors the override
-- **AND** the overrides are not required for the common command
+- **AND** none of these are required for the common command
 
 ### Requirement: One-step init is read-only after checkout
 
