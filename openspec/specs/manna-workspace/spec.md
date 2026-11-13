@@ -8,54 +8,33 @@ OpenCode commands alongside the Urbot checkout, so opening the workspace in Open
 
 ### Requirement: Workspace layout
 
-`manna init` SHALL create or reuse a workspace whose root contains the local Manna kit and whose `urbot/`
-directory contains the Urbot checkout. The workspace SHALL contain:
+`manna init <project>` SHALL create or reuse the project directory as the workspace, and that directory SHALL be
+the Urbot checkout itself. There SHALL be no nested `urbot/` directory inside the project. The workspace SHALL
+contain the Urbot checkout (`pom.xml`, `src/main/java/com/embabel/urbot/`) plus:
 
-- a generated `AGENTS.md`;
+- a single Manna-owned `AGENTS.md`;
 - `.opencode/` with commands and skills;
 - `skills/`, `workflows/`, `policies/`, `shared/`, `docs/`, `generator/`;
 - `skills.json`, `.well-known/`, `.claude-plugin/`;
 - `openspec/config.yaml` and `openspec/specs/`;
-- a `.gitignore` that ignores `.manna-run/` and the nested `urbot/` checkout.
+- local ignore entries for `.manna-run/` recorded outside tracked files.
 
 The workspace SHALL NOT copy kit-maintenance assets: `scripts/dev/`, `evals/`, `package.json`, `skills.lock`,
 or `openspec/changes/`.
 
 #### Scenario: New workspace contains the kit and Urbot
 
-- **WHEN** a user runs `manna init "create an Impromptu bot"`
-- **THEN** the default workspace is the current working directory
-- **AND** it contains the local kit directories and `./urbot`
+- **WHEN** a user runs `manna init demo`
+- **THEN** `./demo` is the Urbot checkout and contains the local kit directories
+- **AND** there is no nested `./demo/urbot`
 - **AND** it does not contain the kit's maintenance tests or change history
 
 #### Scenario: Existing workspace is reused
 
-- **WHEN** the workspace already exists
-- **THEN** `manna init` reuses it
-- **AND** copies only missing files
-- **AND** preserves user-modified files unless `--force` is supplied
-
-### Requirement: Workspace AGENTS.md is the OpenCode entry point
-
-The generated workspace `AGENTS.md` SHALL state that:
-
-- the local Manna kit is at the workspace root;
-- the Urbot checkout is `./urbot` and all Urbot source paths are relative to it;
-- the reader starts with `skills/urbot-router/SKILL.md` and the local workflows;
-- the CLI is the global `manna` command or `node generator/manna.mjs` in the workspace;
-- the OpenSpec root is `./openspec`.
-
-#### Scenario: Paths are unambiguous
-
-- **WHEN** a user opens the workspace in OpenCode
-- **THEN** `AGENTS.md` points at the local skills/workflows and `./urbot`
-- **AND** it does not leave Urbot source paths ambiguous between the workspace root and the checkout
-
-#### Scenario: No kit-maintenance confusion
-
-- **WHEN** the workspace `AGENTS.md` is read
-- **THEN** it identifies the copy as a consumer workspace
-- **AND** it does not instruct the reader to run the kit's maintenance tests
+- **WHEN** the project directory is already a workspace
+- **THEN** `manna init demo` reuses it
+- **AND** replaces existing kit-owned files
+- **AND** leaves files outside the copy set untouched
 
 ### Requirement: OpenCode discovery
 
@@ -76,40 +55,23 @@ The workspace SHALL provide the OpenCode commands from `.opencode/commands/` and
 - **THEN** `openspec/config.yaml` and `openspec/specs/` exist at the workspace root
 - **AND** the kit's archived changes are not copied
 
-### Requirement: Copy and refresh are safe and idempotent
-
-The workspace copy SHALL be sourced from the installed kit root, not from the current working directory. It
-SHALL copy missing files, skip existing files by default, and refresh the copied kit and generated `AGENTS.md`
-only when `--force` is supplied. It SHALL NOT delete user files that are not part of the copy set.
-
-#### Scenario: Re-running is safe
-
-- **WHEN** `manna init` runs twice against the same workspace
-- **THEN** the second run does not fail or duplicate files
-
-#### Scenario: Force refreshes the kit snapshot
-
-- **WHEN** the user runs `manna init ... --force`
-- **THEN** the copied kit files and workspace `AGENTS.md` are refreshed from the installed kit
-- **AND** files outside the copy set are left alone
-
 ### Requirement: Workspace is tooling, not a second application
 
-The workspace SHALL remain a Manna tooling layer. The Urbot checkout at `./urbot` SHALL remain the only
-runtime and domain authority. The workspace SHALL NOT create a second Spring Boot application, a second
+The workspace SHALL remain a Manna tooling layer on top of the Urbot checkout. The project directory SHALL be
+the only runtime and domain authority. The workspace SHALL NOT create a second Spring Boot application, a second
 domain model, or a second persistence layer.
 
 #### Scenario: No second runtime
 
 - **WHEN** the workspace is created
-- **THEN** it contains no generated Spring Boot application beside `./urbot`
+- **THEN** the only Spring Boot application is the Urbot checkout at the project root
 - **AND** the local kit is documentation, commands, and scripts only
 
 #### Scenario: Urbot source is untouched by init
 
-- **WHEN** `manna init` completes
-- **THEN** the Urbot checkout's source and Git state are unchanged
-- **AND** the only writes are the workspace kit copy and optional run state
+- **WHEN** `manna init demo` completes
+- **THEN** the Urbot source and configuration are unchanged
+- **AND** the only writes are the untracked kit copy, `AGENTS.md`, local ignore entries, and optional run state
 
 ### Requirement: Package ships the copy inputs
 
@@ -127,37 +89,136 @@ The kit package SHALL include `.opencode/`, `openspec/config.yaml`, `openspec/sp
 - **THEN** it asserts the copy set, the generated AGENTS paths, the `.opencode` skills, the OpenSpec root, and
   the absence of kit-maintenance assets
 
-### Requirement: In-place workspace copy
+### Requirement: Kit copy overwrites managed files
 
-`manna init` SHALL use the current working directory as the default workspace root. It SHALL NOT create a
-`./manna-workspace` subdirectory by default. The Urbot checkout SHALL default to `./urbot` inside the current
-directory. `--workspace <dir>` SHALL remain an optional override.
+`manna init <project>` SHALL copy the installed kit into the project root and SHALL overwrite an existing file
+when its path is part of the kit copy set, including `AGENTS.md`. Files outside the copy set SHALL be preserved.
+Re-running the command SHALL always produce the same kit snapshot and SHALL NOT duplicate or append to copied
+files.
 
-When an existing `.gitignore` is present, the command SHALL append the missing `.manna-run/` and checkout
-ignore entries and SHALL preserve existing lines. If the current directory is the Manna kit root, the command
-SHALL fail without copying the kit into itself.
+#### Scenario: Existing kit files are replaced
 
-#### Scenario: Default copies in place
+- **WHEN** a kit file already exists in the project directory
+- **THEN** `manna init` overwrites it with the installed kit version
+- **AND** the resulting content matches the kit source
 
-- **WHEN** a user runs `manna init "design the travel domain"` from a project directory
-- **THEN** the workspace is that directory
-- **AND** the Urbot checkout is `./urbot`
-- **AND** no `./manna-workspace` directory is created
+#### Scenario: User files outside the copy set are kept
 
-#### Scenario: Existing .gitignore is extended
+- **WHEN** the project directory contains files that are not part of the kit copy set
+- **THEN** those files are left unchanged
+- **AND** they are not deleted
 
-- **WHEN** the current directory already has a `.gitignore`
-- **THEN** missing `.manna-run/` and `urbot/` entries are appended
-- **AND** existing ignore lines are preserved
+#### Scenario: Re-running is idempotent
+
+- **WHEN** `manna init demo` runs twice
+- **THEN** the second run does not fail
+- **AND** every kit file matches the installed kit source
+- **AND** no file is duplicated
+
+### Requirement: Project directory is the workspace
+
+`manna init` SHALL require a project argument and SHALL resolve it to the target directory. When the target is
+missing or empty, the command SHALL clone the fixed Urbot repository into it and record the resolved commit.
+When the target is an existing Urbot checkout, it SHALL reuse it. When the target exists, is non-empty, and is
+not a Urbot checkout, it SHALL fail before writing.
+
+If the resolved target is the Manna kit root, the command SHALL fail without copying the kit into itself.
+
+#### Scenario: Project name creates the directory
+
+- **WHEN** a user runs `manna init demo` in an empty parent directory
+- **THEN** `./demo` is created
+- **AND** it contains a Urbot checkout and the local kit
+
+#### Scenario: Missing project name is rejected
+
+- **WHEN** a user runs `manna init` with no project
+- **THEN** the command fails with a usage message
+- **AND** nothing is created
+
+#### Scenario: Non-Urbot directory is rejected
+
+- **WHEN** `./demo` exists, is non-empty, and is not a Urbot checkout
+- **THEN** the command fails before copying or cloning
+- **AND** `./demo` is left unchanged
 
 #### Scenario: Kit root is rejected
 
-- **WHEN** `manna init` runs from the Manna kit root
+- **WHEN** the resolved project directory is the Manna kit root
 - **THEN** the command fails before copying
 - **AND** it does not overwrite the kit's `AGENTS.md`
 
-#### Scenario: Workspace override remains optional
+### Requirement: AGENTS.md is replaced and owned by Manna
 
-- **WHEN** the user supplies `--workspace <dir>`
-- **THEN** the workspace root is that directory
-- **AND** the default in-place behavior is not required
+`manna init` SHALL delete the cloned Urbot `AGENTS.md` and write the Manna workspace `AGENTS.md` in its place.
+The written file SHALL contain the operational content the project needs to build, run, test, and extend
+Urbot, including:
+
+- the build, run, and test commands and their prerequisites;
+- the local startup requirements (Neo4j, model credentials, profile activation);
+- the extension model for bots, tools, and domain types;
+- the RAG and memory scoping rules;
+- the repository gotchas that prevent regressions.
+
+The command SHALL NOT keep a second instruction file such as `MANNA.md`, and SHALL NOT rely on an
+`opencode.json` `instructions` entry. `entry` in the output SHALL be `AGENTS.md`.
+
+#### Scenario: Existing Urbot AGENTS.md is replaced
+
+- **WHEN** the cloned Urbot checkout contains `AGENTS.md`
+- **THEN** that file is replaced by the Manna-owned file
+- **AND** exactly one `AGENTS.md` remains
+- **AND** no `MANNA.md` is created
+
+#### Scenario: Essential Urbot operations are present
+
+- **WHEN** the Manna-owned `AGENTS.md` is read
+- **THEN** it contains the compile, test, and run commands
+- **AND** it contains the Neo4j and credential prerequisites
+- **AND** it contains the extension model and the RAG/memory scoping rules
+- **AND** it contains the repository gotchas that init must not lose
+
+#### Scenario: Missing AGENTS.md is created
+
+- **WHEN** the project directory has no `AGENTS.md`
+- **THEN** the command creates the Manna-owned `AGENTS.md`
+- **AND** the output reports `AGENTS.md` as `entry`
+
+### Requirement: Run state stays out of tracked files
+
+`manna init` SHALL NOT modify tracked files other than `AGENTS.md`. When the project is a Git repository, it
+SHALL record `.manna-run/` in `.git/info/exclude` so run state does not appear in `git status`. When the project
+is not a Git repository, it SHALL create a `.gitignore` containing the local entries.
+
+#### Scenario: Existing .gitignore is untouched
+
+- **WHEN** `manna init demo` runs against a cloned checkout with a `.gitignore`
+- **THEN** the file content is unchanged
+- **AND** `.manna-run/` is listed in `.git/info/exclude`
+- **AND** `git status` shows no modification to `.gitignore`
+
+#### Scenario: Non-git target gets a .gitignore
+
+- **WHEN** the project directory is not a Git repository
+- **THEN** the command creates a `.gitignore` with the local entries
+- **AND** the kit copy still completes
+
+### Requirement: Init ends with an OpenCode handoff
+
+`manna init <project>` SHALL finish after cloning or reusing the checkout and copying the kit. Its output SHALL
+include `workspace`, `kit`, `source`, `entry`, and `next`. The `next` value SHALL tell the user to open the
+project in OpenCode to start work. The output SHALL NOT include an inspection result, a selected workflow, or a
+route.
+
+#### Scenario: Output stops before routing
+
+- **WHEN** `manna init demo` completes successfully
+- **THEN** the output describes the workspace, copied kit, source record, entry point, and next step
+- **AND** it contains no inspected request, selected workflow, or applied change
+
+#### Scenario: Work starts in OpenCode
+
+- **WHEN** the user opens `./demo` in OpenCode
+- **THEN** the Manna-owned `AGENTS.md` is loaded
+- **AND** the local skills, workflows, `opsx` commands, and Urbot sources are available
+- **AND** the first real task is handled by the OpenCode session, not by `manna init`
