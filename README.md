@@ -63,7 +63,8 @@ manna init "design the travel domain"
 - Urbot checkout: `./manna-workspace/urbot`, reused when it already exists
 - repository: `https://github.com/jifffffy/urbot`
 - ref: the latest semver tag, falling back to `main`
-- read-only for Urbot: it prints the source record and the selected workflow; it does not apply the workflow
+- read-only for Urbot: it writes the workspace kit copy, prints the source record and selected workflow, and
+  does not apply the workflow
 
 Optional overrides: `--workspace`, `--dir` (Urbot checkout), `--repo`, `--ref`, `--write-state`, and `--force`
 (refresh the copied kit).
@@ -78,6 +79,30 @@ manna urbot inspect --repo https://github.com/jifffffy/urbot --ref <ref> --proje
 `urbot init` pins a shallow checkout and prints the resolved commit. `urbot inspect` reads the project and
 routes the request without modifying it. The profile, tool, and domain-design workflows are the write paths;
 they run separately after their checkpoints.
+
+---
+
+## Self-contained workspace
+
+`manna init` copies the local kit into `./manna-workspace` and places the fixed Urbot checkout in `./urbot`
+inside it:
+
+```text
+manna-workspace/
+├── AGENTS.md          # generated consumer entry point
+├── .opencode/         # commands + OpenCode skills
+├── skills/            # local Manna skills
+├── workflows/         # local workflows
+├── policies/ shared/ docs/ generator/
+├── openspec/          # config + specs
+└── urbot/             # fixed Urbot checkout
+```
+
+Open `./manna-workspace` in OpenCode. The generated `AGENTS.md` points at the local `skills/`, `workflows/`,
+and `./urbot`; `.opencode/skills/` contains OpenCode-discoverable copies of the Manna skills. Use
+`--workspace` for a different root, `--dir` for a checkout outside the workspace, and `--force` to refresh the
+kit snapshot. The workspace does not copy the kit's maintenance tests, lock, package metadata, or OpenSpec
+change history.
 
 ---
 
@@ -247,8 +272,9 @@ manna-ai-kit/
 
 ## Honest limitations
 
-- `manna urbot init` and `manna urbot inspect` are read-only. The profile, tool, and domain-design workflows
-  are the mutation paths and write only after their checkpoints; memory remains a skeleton.
+- `manna init` creates the workspace kit copy and clones/reuses the Urbot checkout, but does not modify Urbot
+  source. `manna urbot init` and `manna urbot inspect` are read-only. The profile, tool, and domain-design
+  workflows are the Urbot mutation paths and write only after their checkpoints; memory remains a skeleton.
 - The retired generator, templates, schemas, examples, tests, and all `manna-*` skills/workflows have been
   deleted; the main path is Urbot-only.
 - Behavior evals need a live LLM and are tagged `integration`; they are not deterministic.
