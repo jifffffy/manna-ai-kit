@@ -101,8 +101,9 @@ they run separately after their checkpoints.
 Open the current directory in OpenCode. The generated `AGENTS.md` points at the local `skills/`, `workflows/`,
 and `./urbot`; `.opencode/skills/` contains OpenCode-discoverable copies of the Manna skills. Use
 `--workspace` for a different root, `--dir` for a checkout outside the workspace, and `--force` to refresh the
-kit snapshot. The workspace does not copy the kit's maintenance tests, lock, package metadata, or OpenSpec
-change history.
+kit snapshot. Existing files are preserved by default; an existing `.gitignore` is extended with
+`.manna-run/` and `urbot/`, and the Manna kit root is rejected as a workspace. The workspace does not copy the
+kit's maintenance tests, lock, package metadata, or OpenSpec change history.
 
 ---
 
