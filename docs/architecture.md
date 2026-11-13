@@ -55,9 +55,12 @@ The primary path is one step:
 manna init "<natural language request>"
 ```
 
-It uses the fixed `https://github.com/jifffffy/urbot` repository, the latest semver tag (falling back to
-`main`), and `./urbot` (reused when present). It prints the source record and the selected workflow and does not
-apply it. Optional overrides: `--repo`, `--ref`, `--dir`, `--write-state`.
+It creates `./manna-workspace` with a local copy of the kit (`AGENTS.md`, `.opencode/`, `skills/`,
+`workflows/`, `policies/`, `shared/`, `docs/`, `generator/`, `openspec/`) and the fixed Urbot checkout at
+`./urbot` (reused when present). Open the workspace directory in OpenCode to use the local skills and
+commands. The command prints the workspace, copied kit, source record, and selected workflow, and does not
+apply the workflow. Optional overrides: `--workspace`, `--repo`, `--ref`, `--dir` (Urbot checkout),
+`--write-state`, and `--force` (refresh the copied kit).
 
 The explicit commands remain:
 

@@ -8,7 +8,7 @@ function usage() {
   console.log(`manna
 
 Usage:
-  manna init "<natural language request>" [--repo <url>] [--ref <ref>] [--dir <dir>] [--write-state]
+  manna init "<natural language request>" [--workspace <dir>] [--repo <url>] [--ref <ref>] [--dir <dir>] [--write-state] [--force]
   manna urbot init --repo <url> --ref <ref> --dir <dir> [--write-state]
   manna urbot inspect --repo <url> --ref <ref> --project <dir> --request "<natural language request>" [--write-state]
 `);

@@ -52,18 +52,21 @@ npm run check:urbot-only
 > **Urbot-only:** the retired generator, templates, schemas, examples, and all `manna-*` skills/workflows have
 > been deleted. The main path contains only the Urbot orchestration and its retained spine.
 
-One-step init uses the fixed Urbot template and routes your request:
+One-step init creates a self-contained workspace and routes your request:
 
 ```bash
 manna init "design the travel domain"
 ```
 
+- workspace: `./manna-workspace` (open this directory in OpenCode)
+- local kit: `skills/`, `workflows/`, `policies/`, `.opencode/`, `generator/`, `openspec/`
+- Urbot checkout: `./manna-workspace/urbot`, reused when it already exists
 - repository: `https://github.com/jifffffy/urbot`
 - ref: the latest semver tag, falling back to `main`
-- checkout: `./urbot`, reused when it already exists
-- read-only: it prints the source record and the selected workflow; it does not apply the workflow
+- read-only for Urbot: it prints the source record and the selected workflow; it does not apply the workflow
 
-Optional overrides: `--repo`, `--ref`, `--dir`, and `--write-state`.
+Optional overrides: `--workspace`, `--dir` (Urbot checkout), `--repo`, `--ref`, `--write-state`, and `--force`
+(refresh the copied kit).
 
 The explicit read-only commands remain available:
 

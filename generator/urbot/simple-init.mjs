@@ -4,12 +4,12 @@ import { initCommand, URBOT_REPO } from "./init.mjs";
 import { inspectCommand } from "./inspect.mjs";
 import { writeStateFile } from "./state.mjs";
 import { gitOrNull } from "./git.mjs";
+import { copyWorkspaceKit, DEFAULT_WORKSPACE, KIT_ROOT } from "./workspace.mjs";
 
-export const DEFAULT_DIR = "urbot";
 export const DEFAULT_BRANCH = "main";
 
 const USAGE = [
-  'manna init "<request>" [--repo <url>] [--ref <ref>] [--dir <dir>] [--write-state]'
+  'manna init "<request>" [--workspace <dir>] [--repo <url>] [--ref <ref>] [--dir <dir>] [--write-state] [--force]'
 ];
 
 export function resolveDefaultRef(repo) {
@@ -35,9 +35,19 @@ export function resolveDefaultRef(repo) {
 export function runSimpleInit(args) {
   const { request, options } = parseArgs(args);
   if (options.help) return { usage: USAGE };
-  if (!request) throw new Error('Usage: manna init "<request>" [--repo <url>] [--ref <ref>] [--dir <dir>]');
+  if (!request) {
+    throw new Error(
+      'Usage: manna init "<request>" [--workspace <dir>] [--repo <url>] [--ref <ref>] [--dir <dir>] [--write-state] [--force]'
+    );
+  }
 
-  const dir = path.resolve(options.dir);
+  const workspace = path.resolve(options.workspace);
+  if (workspace === KIT_ROOT) {
+    throw new Error("Workspace must not be the Manna kit root");
+  }
+  const dir = path.resolve(options.dir ?? path.join(workspace, "urbot"));
+
+  const kit = copyWorkspaceKit(workspace, { checkout: dir, force: options.force });
   const source = ensureSource({ dir, repo: options.repo, ref: options.ref, writeState: options.writeState });
   const inspection = inspectCommand({
     project: dir,
@@ -46,7 +56,7 @@ export function runSimpleInit(args) {
     writeState: options.writeState
   });
 
-  return { source, inspection };
+  return { workspace, kit, source, inspection };
 }
 
 function ensureSource({ dir, repo, ref, writeState }) {
@@ -119,7 +129,7 @@ function detectCurrentRef(dir) {
 }
 
 function parseArgs(args) {
-  const options = { repo: URBOT_REPO, dir: DEFAULT_DIR };
+  const options = { repo: URBOT_REPO, workspace: DEFAULT_WORKSPACE };
   let request = null;
 
   for (let index = 0; index < args.length; index += 1) {
@@ -132,6 +142,10 @@ function parseArgs(args) {
       options.writeState = true;
       continue;
     }
+    if (arg === "--force") {
+      options.force = true;
+      continue;
+    }
     if (!arg.startsWith("--")) {
       if (request !== null) throw new Error(`Unexpected argument: ${arg}`);
       request = arg;
@@ -139,7 +153,7 @@ function parseArgs(args) {
     }
 
     const key = arg.slice(2);
-    if (!["repo", "ref", "dir"].includes(key)) {
+    if (!["repo", "ref", "dir", "workspace"].includes(key)) {
       throw new Error(`Unknown option: --${key}`);
     }
     const value = args[index + 1];

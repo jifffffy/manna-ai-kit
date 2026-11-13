@@ -33,7 +33,10 @@
     "workflows/",
     "policies/",
     "generator/",
-    "docs/"
+    "docs/",
+    ".opencode/",
+    "openspec/config.yaml",
+    "openspec/specs/"
   ],
   "engines": {
     "node": ">=22.0.0"
