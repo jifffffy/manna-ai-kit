@@ -182,11 +182,12 @@ workflow.
 ### Requirement: One-step init command
 
 Manna SHALL provide `init "<request>"` as the primary first-run command through the existing `manna` binary.
-The command SHALL create or reuse a self-contained workspace in the current working directory (or `--workspace <dir>`) containing a local
-copy of the Manna orchestration layer and skills. The Urbot checkout SHALL default to `<workspace>/urbot`,
-using `https://github.com/jifffffy/urbot` and the latest semver tag or `main` when the ref is omitted. The
-command SHALL reuse a valid existing checkout and clone only when it is missing, then run the read-only
-discovery and router. It SHALL print the workspace, copied kit, source record, and selected workflow.
+The command SHALL create or reuse a self-contained workspace in the current working directory (or
+`--workspace <dir>`) containing a local copy of the Manna orchestration layer and skills. The Urbot checkout
+SHALL default to `<workspace>/urbot`, using `https://github.com/jifffffy/urbot` and the latest semver tag or
+`main` when the ref is omitted. The command SHALL reuse a valid existing checkout and clone only when it is
+missing, then run the read-only discovery and router. It SHALL print the workspace, copied kit, source record,
+and selected workflow.
 
 #### Scenario: No flags uses the fixed defaults
 
