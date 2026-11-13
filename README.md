@@ -28,7 +28,7 @@ It is **not**:
 ```text
 User request
   → Intent router
-  → Urbot development flow (first bot / add / modify / tool / memory / pipeline / verify / release)
+  → Urbot development flow (bootstrap / profile / prompt / tool / domain design / domain memory / verification)
   → Inspect authoritative Urbot source
   → Plan the smallest change
   → Apply inside the Urbot source tree
@@ -66,6 +66,7 @@ manna init demo
 - repository: `https://github.com/jifffffy/urbot`
 - ref: the latest semver tag, falling back to `main`
 - read-only for Urbot: it does not modify Urbot source, configuration, or Git history
+- output: `workspace`, `kit`, `source`, `entry` (always `AGENTS.md`), and `next`
 
 Optional overrides: `--repo`, `--ref`, and `--write-state`. A missing project name is an error; `--workspace`,
 `--dir`, and `--force` are not part of `init`.
@@ -274,8 +275,9 @@ manna-ai-kit/
 ## Honest limitations
 
 - `manna init` creates the project workspace (clone or reuse plus kit copy) and replaces `AGENTS.md`, but does
-  not modify Urbot source or configuration. `manna urbot init` and `manna urbot inspect` are read-only. The profile, tool, and domain-design
-  workflows are the Urbot mutation paths and write only after their checkpoints; memory remains a skeleton.
+  not modify Urbot source or configuration. `manna urbot init` and `manna urbot inspect` are read-only. The
+  profile, tool, and domain-design workflows are the Urbot mutation paths and write only after their
+  checkpoints; memory remains a skeleton.
 - The retired generator, templates, schemas, examples, tests, and all `manna-*` skills/workflows have been
   deleted; the main path is Urbot-only.
 - Behavior evals need a live LLM and are tagged `integration`; they are not deterministic.
