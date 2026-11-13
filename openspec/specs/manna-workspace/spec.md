@@ -24,8 +24,8 @@ or `openspec/changes/`.
 #### Scenario: New workspace contains the kit and Urbot
 
 - **WHEN** a user runs `manna init "create an Impromptu bot"`
-- **THEN** the default workspace is `./manna-workspace`
-- **AND** it contains the local kit directories and `./manna-workspace/urbot`
+- **THEN** the default workspace is the current working directory
+- **AND** it contains the local kit directories and `./urbot`
 - **AND** it does not contain the kit's maintenance tests or change history
 
 #### Scenario: Existing workspace is reused

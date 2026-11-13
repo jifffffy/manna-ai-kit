@@ -58,9 +58,9 @@ One-step init creates a self-contained workspace and routes your request:
 manna init "design the travel domain"
 ```
 
-- workspace: `./manna-workspace` (open this directory in OpenCode)
+- workspace: the current directory (open it in OpenCode)
 - local kit: `skills/`, `workflows/`, `policies/`, `.opencode/`, `generator/`, `openspec/`
-- Urbot checkout: `./manna-workspace/urbot`, reused when it already exists
+- Urbot checkout: `./urbot`, reused when it already exists
 - repository: `https://github.com/jifffffy/urbot`
 - ref: the latest semver tag, falling back to `main`
 - read-only for Urbot: it writes the workspace kit copy, prints the source record and selected workflow, and
@@ -84,11 +84,11 @@ they run separately after their checkpoints.
 
 ## Self-contained workspace
 
-`manna init` copies the local kit into `./manna-workspace` and places the fixed Urbot checkout in `./urbot`
-inside it:
+`manna init` copies the local kit into the current working directory and places the fixed Urbot checkout in
+`./urbot` inside it:
 
 ```text
-manna-workspace/
+./
 ├── AGENTS.md          # generated consumer entry point
 ├── .opencode/         # commands + OpenCode skills
 ├── skills/            # local Manna skills
@@ -98,7 +98,7 @@ manna-workspace/
 └── urbot/             # fixed Urbot checkout
 ```
 
-Open `./manna-workspace` in OpenCode. The generated `AGENTS.md` points at the local `skills/`, `workflows/`,
+Open the current directory in OpenCode. The generated `AGENTS.md` points at the local `skills/`, `workflows/`,
 and `./urbot`; `.opencode/skills/` contains OpenCode-discoverable copies of the Manna skills. Use
 `--workspace` for a different root, `--dir` for a checkout outside the workspace, and `--force` to refresh the
 kit snapshot. The workspace does not copy the kit's maintenance tests, lock, package metadata, or OpenSpec

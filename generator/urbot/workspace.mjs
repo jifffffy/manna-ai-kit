@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const KIT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-export const DEFAULT_WORKSPACE = "manna-workspace";
+export const DEFAULT_WORKSPACE = ".";
 
 const COPY_SET = [
   ".opencode",
@@ -69,14 +69,7 @@ export function copyWorkspaceKit(workspace, options = {}) {
   );
 
   const checkoutIgnore = ignorePath(root, options.checkout);
-  writeGenerated(
-    root,
-    ".gitignore",
-    `.DS_Store\n.idea/\n*.iml\nnode_modules/\ntarget/\n.env\n.manna-run/\n${checkoutIgnore}\n`,
-    options.force,
-    copied,
-    skipped
-  );
+  ensureGitignore(root, checkoutIgnore, copied, skipped);
 
   return { copied, skipped };
 }
@@ -131,4 +124,20 @@ function ignorePath(workspace, checkout) {
     return "urbot/";
   }
   return `${relative.split(path.sep).join("/")}/`;
+}
+
+function ensureGitignore(root, checkoutIgnore, copied, skipped) {
+  const destination = path.join(root, ".gitignore");
+  const required = [".DS_Store", ".idea/", "*.iml", "node_modules/", "target/", ".env", ".manna-run/", checkoutIgnore];
+  const existing = fs.existsSync(destination) ? fs.readFileSync(destination, "utf8") : "";
+  const lines = existing.split("\n");
+  const present = new Set(lines.map((line) => line.trim()).filter(Boolean));
+  const missing = required.filter((line) => !present.has(line));
+  if (missing.length === 0) {
+    skipped.push(".gitignore");
+    return;
+  }
+  const prefix = existing.length === 0 ? "" : existing.endsWith("\n") ? existing : `${existing}\n`;
+  fs.writeFileSync(destination, `${prefix}${missing.join("\n")}\n`);
+  copied.push(".gitignore");
 }

@@ -16,12 +16,12 @@ try {
   fs.mkdirSync(work, { recursive: true });
   createSource(source);
 
-  const workspace = path.join(work, "manna-workspace");
+  const workspace = work;
   const checkout = path.join(workspace, "urbot");
   const first = run(["init", "design the travel domain", "--repo", source], work);
   check(
     fs.realpathSync(first.workspace) === fs.realpathSync(workspace),
-    "first run must create ./manna-workspace"
+    "first run must use the current directory"
   );
   check(first.source.repository === source, "first run must use the repository override");
   check(first.source.requestedRef === "refs/tags/v0.2.0", "first run must select the highest tag");

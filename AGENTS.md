@@ -110,10 +110,10 @@ The primary path is one step:
 manna init "<natural language request>"
 ```
 
-It creates a self-contained workspace at `./manna-workspace` and copies the local kit into it:
+It creates a self-contained workspace in the current working directory and copies the local kit into it:
 
 ```text
-manna-workspace/
+./
 ├── AGENTS.md          # generated consumer entry point
 ├── .opencode/         # commands + OpenCode skills
 ├── skills/            # local Manna skills
