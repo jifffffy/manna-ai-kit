@@ -8,10 +8,10 @@ Git, and load only approved rows into the Urbot graph.
 
 ### Requirement: Generate produces reviewable candidates
 
-The pipeline SHALL write candidate rows to a CSV file without writing to the graph. Each generated row SHALL
-carry a `status` value of `pending`, a `reason`, and a confidence or strength value where the relationship type
-supports it. Generation SHALL be skippable and SHALL NOT overwrite a CSV that already contains reviewed rows
-without an explicit, approved regeneration.
+The generated Java enhancer SHALL write candidate rows to a CSV file without writing to the graph. Each
+generated row SHALL carry a `status` value of `pending`, a `reason`, and a confidence or strength value where
+the relationship type supports it. Generation SHALL be skippable and SHALL NOT overwrite a CSV that already
+contains reviewed rows without an explicit, approved regeneration.
 
 #### Scenario: Generation writes pending rows only
 
@@ -28,8 +28,8 @@ without an explicit, approved regeneration.
 ### Requirement: Human review happens in CSV and Git
 
 The CSV file SHALL be the review surface and Git SHALL be the audit trail. A reviewer SHALL be able to mark a
-row `approved` or `rejected`, and to delete a wrong row. The pipeline SHALL NOT require a UI, an admin backend,
-or a database review table.
+row `approved` or `rejected`, and to delete a wrong row. The pipeline SHALL NOT require a UI, a review table, or
+an admin backend. A profile-scoped REST surface MAY expose generation and apply for headless operation.
 
 #### Scenario: A reviewer approves rows
 
@@ -47,13 +47,14 @@ or a database review table.
 
 - **WHEN** review is performed
 - **THEN** any spreadsheet or text editor plus Git is sufficient
-- **AND** no Urbot UI, admin endpoint, or approval table is added
+- **AND** no Urbot UI, review table, or admin backend is added
+- **AND** generation and apply may be triggered by a REST call instead
 
 ### Requirement: Apply loads approved rows only
 
-The apply step SHALL filter rows case-insensitively by `status=approved`. Rows with `pending` or `rejected`
-status SHALL never be written to the graph. Ignoring the status column (a force apply) SHALL be a separate
-destructive action, SHALL report what it would write, and SHALL require explicit approval.
+The generated Java apply step SHALL filter rows case-insensitively by `status=approved`. Rows with `pending` or
+`rejected` status SHALL never be written to the graph. Ignoring the status column (a force apply) SHALL NOT be
+exposed by the generated pipeline.
 
 #### Scenario: Only approved rows are written
 
@@ -93,9 +94,9 @@ SHALL be safe.
 
 ### Requirement: A reviewer script validates the CSV
 
-The skill SHALL provide a zero-dependency reviewer script that parses the CSV, checks the required header
-columns, validates every `status` value, detects duplicate keys, and prints per-status counts. In apply mode it
-SHALL fail when any row is still `pending`, when no row is `approved`, or when any row is invalid.
+The skill SHALL keep its zero-dependency reviewer script as an optional pre-check. The script SHALL parse the
+CSV, check the required header columns, validate every `status` value, detect duplicate keys, and print
+per-status counts. The generated Java apply SHALL remain the enforcement point.
 
 #### Scenario: A clean reviewed CSV passes
 
@@ -117,9 +118,9 @@ SHALL fail when any row is still `pending`, when no row is `approved`, or when a
 
 ### Requirement: The workflow gates apply on review
 
-The `urbot-data-enhance-pipeline` workflow SHALL run discovery, generate, review validation, and apply in that
-order, and SHALL stop at `CHECKPOINT: REVIEW` between generation and apply. The routed skill sequence SHALL
-include `urbot-discovery` and `urbot-verification`.
+The `urbot-data-enhance-pipeline` workflow SHALL run discovery, generator plan, generation, review validation,
+and apply in that order, and SHALL stop at `CHECKPOINT: REVIEW` between generation and apply. The routed skill
+sequence SHALL include `urbot-discovery` and `urbot-verification`.
 
 #### Scenario: Apply is unreachable before review
 
@@ -131,4 +132,41 @@ include `urbot-discovery` and `urbot-verification`.
 
 - **WHEN** apply completes
 - **THEN** the workflow reports the counts and the verification commands
-- **AND** hands the CSV and code changes back as a Git diff
+- **AND** hands the CSV and Java changes back as a Git diff
+
+### Requirement: Manna generates the Java pipeline
+
+The `urbot-data-enhance-pipeline` skill SHALL generate the pipeline as Java code in the target bot package. A
+plan SHALL list the files and require approval before writing. The generated code SHALL include the batch
+lifecycle, the CSV reader/writer, the pipeline service, the batch enhancer, a profile-scoped REST controller,
+and a test.
+
+The generator SHALL read the bot's `domain/` package to resolve the source and target `NamedEntity` types and
+their Neo4j labels, and SHALL generate the CSV header, key columns, typed record, and Cypher from that domain.
+Generation SHALL be pattern-based: no LLM call and no prompt template.
+
+#### Scenario: The generator plans before writing
+
+- **WHEN** the generator runs without `--approve`
+- **THEN** it reports the batch, source, target, relationship, CSV path, and every file it would write
+- **AND** it writes nothing
+
+#### Scenario: The generated pipeline is complete
+
+- **WHEN** the generator runs with `--approve`
+- **THEN** the bot package contains the batch lifecycle, CSV helper, pipeline service, enhancer, REST
+  controller, and test
+- **AND** every generated bean is gated by `@Profile("<bot>")`
+
+#### Scenario: Parsing follows the domain
+
+- **WHEN** the source and target types are resolved from the domain package
+- **THEN** the generated CSV header and listener use their IDs
+- **AND** the generated Cypher matches their labels and relationship name
+- **AND** a missing type or ID is reported instead of guessed
+
+#### Scenario: Pattern generation only
+
+- **WHEN** the enhancer is generated
+- **THEN** candidate generation is an explicit pattern method with no LLM call
+- **AND** the method is the documented extension point for domain rules
