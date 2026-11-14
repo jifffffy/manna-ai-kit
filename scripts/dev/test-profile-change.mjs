@@ -7,6 +7,7 @@ import { spawnSync } from "node:child_process";
 import { applyProfile } from "../../skills/urbot-profile/scripts/apply.mjs";
 import { routeRequest } from "../../generator/urbot/route.mjs";
 
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const PERSONA =
   "You are a professional and friendly travel assistant. You help users plan trips with clear, practical, and encouraging guidance.";
 const OBJECTIVE =
@@ -179,6 +180,53 @@ function testFixture(temp) {
     discovery: {}
   });
   check(promptRoute.route === "urbot-prompt-tuning", "pure persona request must route to urbot-prompt-tuning");
+
+  testCliFlags(temp);
+}
+
+function testCliFlags(temp) {
+  const project = path.join(temp, "cli");
+  fs.mkdirSync(path.join(project, "src", "main", "java", "com", "embabel", "urbot"), { recursive: true });
+  fs.writeFileSync(path.join(project, "pom.xml"), "<project/>\n");
+  const script = path.join(ROOT, "skills/urbot-profile/scripts/apply.mjs");
+  const run = (args) =>
+    spawnSync(process.execPath, [script, "--project", project, ...args], { encoding: "utf8" });
+
+  const kebab = run([
+    "--name",
+    "trail",
+    "--persona",
+    "You are an experienced trail guide.",
+    "--objective",
+    "Help hikers plan safe routes.",
+    "--behaviour",
+    "trail",
+    "--behaviour-text",
+    "Speak like an experienced trail guide.",
+    "--max-words",
+    "120",
+    "--temperature",
+    "0.3",
+    "--approve"
+  ]);
+  check(kebab.status === 0, `kebab-case flags must be accepted:\n${kebab.stdout}${kebab.stderr}`);
+  check(JSON.parse(kebab.stdout).status === "applied", "kebab-case flags must apply the profile");
+
+  const properties = read(project, "src/main/resources/application-trail.properties");
+  check(properties.includes("urbot.chat.max-words=120"), "--max-words must reach the properties file");
+  check(properties.includes("urbot.chat.behaviour=trail"), "--behaviour must reach the properties file");
+  check(properties.includes("urbot.chat.llm.temperature=0.3"), "--temperature must reach the properties file");
+
+  const behaviour = read(project, "src/main/resources/prompts/behaviours/trail.jinja");
+  check(behaviour.includes("experienced trail guide"), "--behaviour-text must reach the behaviour template");
+  check(
+    !behaviour.includes("Follow the default Urbot conversation style."),
+    "--behaviour-text must not fall back to the placeholder"
+  );
+
+  const unknown = run(["--name", "trail2", "--persona", "p", "--objective", "o", "--bogus", "1"]);
+  check(unknown.status === 1, "an unknown option must fail");
+  check(unknown.stderr.includes("Unknown option: --bogus"), "an unknown option must be named");
 }
 
 function testRealCheckout(project, temp) {

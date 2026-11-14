@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "version": "0.1.0",
-  "digest": "dc1aab5666fff67ec860a1e4e6933a94c5a79e8462d5bf1d7f6f7497f9865c21",
-  "generatedAt": "2026-11-14T02:44:41.308Z",
+  "digest": "1ef127d15f23628dbb8a8324337610adf9aac1f20365ff70d555480abe14250e",
+  "generatedAt": "2026-11-14T03:01:12.791Z",
   "files": {
     ".claude-plugin/plugin.json": "63017115e627ec050779b210a8ddbf842eb4b44d6b20ba213052dc376ec5fced",
     ".gitignore": "403f529fd334a50f3d4ed06b6e08bf826f23ebd4261a15f709c1bdf11db7bf87",
@@ -30,7 +30,7 @@
     "scripts/dev/lock-utils.mjs": "0c6121329dae7bdba7afd0956ebd6913e9092c972a5aaa3255804b363fdb6862",
     "scripts/dev/test-data-enhance-pipeline.mjs": "db117c5c4e3365e570004c9bfef4a4899c6d926a5595359a271d5ea2c9898428",
     "scripts/dev/test-domain-design.mjs": "a5789a29aeb2844d5d35591cdae85b124ffce8e0e69e4e803de89e2d51d9968e",
-    "scripts/dev/test-profile-change.mjs": "48b82f0820490ff37abfd44dcf7db914788b19ef01dddea84fcc9fa9d3c54f6d",
+    "scripts/dev/test-profile-change.mjs": "2766b51b7e7b695a16fe3a59bc0714c866c0db822b263ddf9e763e2cb9ff90bb",
     "scripts/dev/test-routing.mjs": "74a8d59bf62c9ddb981c5ef056bfd5ab0c8c05e904a9938d96bee5d92cc038da",
     "scripts/dev/test-simple-init.mjs": "c665fd2a2d375eefe3eb95a8a6811cc359136eb681d4c28c79aeff0ce671b67d",
     "scripts/dev/test-tool-development.mjs": "ca4c9cf1f70e8252c5f4f6f78e1244453d2cf2edc5ea081f7a6b09c14fbecdfa",
@@ -50,7 +50,7 @@
     "skills/urbot-domain-design/scripts/apply.mjs": "ba438087a2709674865e157edee4e2e24d61db871d7601237a9c233b59f20667",
     "skills/urbot-domain-memory/SKILL.md": "3f8783add32c62e0e4cc8ffee26c6eb5a3ecbb1a2c6f4b9dd5d09334fbe5b69f",
     "skills/urbot-profile/SKILL.md": "979dc90ff85faeea21c9ca41ee67ef6a63e810d35a1abd6962bf9abe8720a143",
-    "skills/urbot-profile/scripts/apply.mjs": "85787bcb17f7457715a5ffe20994007b529e5bef8ce8202fd39a74690697b962",
+    "skills/urbot-profile/scripts/apply.mjs": "191f7644cf4934b2707a93a140142be1115138ecbe17cd609c0d20d75666e1e4",
     "skills/urbot-prompt/SKILL.md": "ffbb01aac263149d7c7170d2a9fb3b5a048dbc9cf64020550a27d618d6a7b8bb",
     "skills/urbot-router/SKILL.md": "963edfdfe5ebe479d9d0fc17fb3f6aac29e1fd012cdff7e8636980d4d7a83875",
     "skills/urbot-tool/SKILL.md": "24408012aeb78e7cbc27b63eca8284b9687a9ed9f70bf3f7d1c38f7686711d8c",

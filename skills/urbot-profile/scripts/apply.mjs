@@ -178,6 +178,22 @@ function pascal(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+const KNOWN_VALUE_OPTIONS = new Set([
+  "project",
+  "name",
+  "persona",
+  "objective",
+  "behaviour",
+  "behaviourText",
+  "maxWords",
+  "model",
+  "temperature"
+]);
+
+function normalizeKey(key) {
+  return key.replace(/-([a-zA-Z0-9])/g, (_, char) => char.toUpperCase());
+}
+
 function parseArgs(args) {
   const options = {
     behaviour: "default",
@@ -203,10 +219,14 @@ function parseArgs(args) {
     if (!arg.startsWith("--")) {
       throw new Error(`Unexpected argument: ${arg}`);
     }
-    const key = arg.slice(2);
+    const rawKey = arg.slice(2);
+    const key = normalizeKey(rawKey);
+    if (!KNOWN_VALUE_OPTIONS.has(key)) {
+      throw new Error(`Unknown option: --${rawKey}`);
+    }
     const value = args[index + 1];
     if (value === undefined || value.startsWith("--")) {
-      throw new Error(`Missing value for --${key}`);
+      throw new Error(`Missing value for --${rawKey}`);
     }
     options[key] = value;
     index += 1;
