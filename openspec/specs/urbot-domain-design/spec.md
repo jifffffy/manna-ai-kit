@@ -35,13 +35,15 @@ and ubiquitous-language terms.
 ### Requirement: DDD model
 
 The skill SHALL map the color model to a DDD model with a bounded context, aggregate boundaries, aggregate
-roots, entities, value objects, domain events, domain services, and repositories. Relationships SHALL respect
-aggregate boundaries, using identifiers for cross-aggregate references.
+roots, entities, catalog entities, value objects, domain events, domain services, and repositories.
+Relationships SHALL respect aggregate boundaries, using identifiers for cross-aggregate references, and SHALL
+record the graph relationship type separately from the Java method name.
 
 #### Scenario: Colors map to DDD building blocks
 
 - **WHEN** the color model is complete
-- **THEN** it is mapped to aggregates, entities, value objects, events, services, and repositories
+- **THEN** it is mapped to aggregates, entities, catalog entities, value objects, events, services, and
+  repositories
 - **AND** each aggregate has one root and one consistency boundary
 
 #### Scenario: Invariants live at the boundary
@@ -55,7 +57,7 @@ aggregate boundaries, using identifiers for cross-aggregate references.
 The implementation SHALL write only inside `src/main/java/com/embabel/bot/<bot>/domain/` and the bot test
 package:
 
-- aggregate roots and entities as `NamedEntity` interfaces;
+- aggregate roots, entities, and catalog entities as `NamedEntity` interfaces;
 - value objects and domain events as Java records;
 - domain services as classes when needed;
 - repositories using Urbot's `NamedEntityDataRepository`, never a second persistence layer;
@@ -64,7 +66,7 @@ package:
 
 #### Scenario: Entities follow the Urbot convention
 
-- **WHEN** an entity or aggregate root is generated
+- **WHEN** an entity, aggregate root, or catalog entity is generated
 - **THEN** it is a `NamedEntity` interface in the bot domain package
 - **AND** value objects and events are records in the same package or its `events/` subpackage
 
@@ -120,7 +122,7 @@ the `AGENTS.md`/`README.md` inventories SHALL include it.
 #### Scenario: Inventory stays consistent
 
 - **WHEN** `npm run validate` and `npm run check:urbot-only` run
-- **THEN** the eight Urbot skills and seven Urbot workflows are consistent
+- **THEN** the nine Urbot skills and eight Urbot workflows are consistent
 - **AND** no legacy asset is introduced
 
 ### Requirement: Verification uses Urbot's own commands
@@ -149,3 +151,88 @@ The change SHALL pass `npm test` and `openspec validate add-urbot-domain-design 
 - **WHEN** the change is complete
 - **THEN** `npm test` passes
 - **AND** `openspec validate add-urbot-domain-design --strict` passes
+
+### Requirement: Domain model schema is versioned
+
+The domain-design generator SHALL accept a versioned model with `schemaVersion: 2`. It SHALL reject a model
+without the version or with an older version, and the error SHALL state that the model must be migrated to v2.
+The v2 model SHALL support:
+
+- `classes[].dddVariant`: `aggregate-root`, `entity`, `catalog-entity`, or `value-object`;
+- `classes[].creationPermitted` and `classes[].description`;
+- `classes[].relationships[].method`, `.type`, `.target`, `.cardinality`, `.optional`, and `.direction`;
+- `classes[].attributes[].optional` and `.description`.
+
+#### Scenario: A v2 model is accepted
+
+- **WHEN** the model declares `schemaVersion: 2`
+- **THEN** the generator validates and plans it
+- **AND** every new field is reflected in the generated code
+
+#### Scenario: A v1 model is rejected
+
+- **WHEN** the model omits `schemaVersion` or declares an older version
+- **THEN** the generator fails before writing
+- **AND** the message tells the author to migrate the model to v2
+
+### Requirement: Graph relationships are explicit
+
+Every entity relationship SHALL generate a `@Relationship` annotation whose `name` is the Neo4j relationship
+type. The Java method name SHALL be independent of the graph type, so `nationalities()` can map to
+`HAS_NATIONALITY`. The model SHALL support self-relations, multiple relationship types between the same pair,
+optional single relations, and `OUTGOING`/`INCOMING`/`BOTH` direction.
+
+#### Scenario: Relationship name is separate from the method
+
+- **WHEN** a class declares a relationship with `method: "nationalities"` and `type: "HAS_NATIONALITY"`
+- **THEN** the generated getter is `nationalities()`
+- **AND** it carries `@Relationship(name = "HAS_NATIONALITY")`
+
+#### Scenario: Self and multi-type relations are generated
+
+- **WHEN** the model declares `Composer -> INFLUENCED -> Composer` and both `SCORED_FOR` and `FEATURES` to
+  instruments
+- **THEN** the generator emits both self and multi-type getters with their own annotations
+- **AND** no relationship is merged or renamed
+
+#### Scenario: Optional and directed relations are annotated
+
+- **WHEN** a single relation is optional
+- **THEN** the getter carries `@Nullable`
+- **AND** a non-default direction adds `direction = RelationshipDirection.<VALUE>`
+
+### Requirement: Catalog entities are first-class
+
+A blue description or reference catalog SHALL be representable as `catalog-entity`. A catalog entity SHALL be a
+`NamedEntity` interface, not a record, so it keeps identity and graph persistence. The generator SHALL emit
+`@CreationPermitted(false)` for catalog entities unless the model overrides it.
+
+#### Scenario: Catalog is generated as an entity
+
+- **WHEN** `Genre`, `Epoch`, or `Nationality` is declared as `catalog-entity`
+- **THEN** the generator writes a `NamedEntity` interface
+- **AND** it is not written as a record
+
+#### Scenario: Creation policy is honored
+
+- **WHEN** an entity declares `creationPermitted: true`
+- **THEN** the generated interface carries `@CreationPermitted(true)`
+- **AND** catalog entities default to `@CreationPermitted(false)`
+
+### Requirement: Extraction metadata is generated
+
+Entity and catalog interfaces SHALL carry `@JsonClassDescription` from the class description. Attributed getters
+SHALL carry `@JsonPropertyDescription` when a description is present. Optional attributes and relations SHALL
+carry `@Nullable`.
+
+#### Scenario: Class and property descriptions reach the model
+
+- **WHEN** a class and its attributes declare descriptions
+- **THEN** the interface carries `@JsonClassDescription`
+- **AND** each described getter carries `@JsonPropertyDescription`
+
+#### Scenario: Optional values are nullable
+
+- **WHEN** an attribute or single relation is optional
+- **THEN** its getter or record component carries `@Nullable`
+- **AND** nullability checks skip the optional value
