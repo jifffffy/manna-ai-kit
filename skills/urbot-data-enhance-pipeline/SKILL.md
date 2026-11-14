@@ -1,6 +1,6 @@
 ---
 name: urbot-data-enhance-pipeline
-description: Generate reviewable data enhancement CSV batches, gate them on human review, and apply only approved rows.
+description: Generate the Java data-enhancement pipeline for a Urbot bot, with CSV review and approved-only apply.
 version: 0.1.0
 mode-default: review
 requires:
@@ -13,74 +13,113 @@ requires:
 
 ## When to use
 
-A Urbot project needs to enrich its graph in bulk: relationship inference, nationality or technique assignment,
-instrumentation, or any LLM- or pattern-generated data that a human must sign off before it becomes durable
-knowledge.
+A Urbot bot needs to enrich its graph in bulk: relationship inference, classification, instrumentation, or any
+pattern-derived data that a human must sign off before it becomes durable knowledge.
 
-Use this skill to define the batch, generate candidates, run the review gate, and apply only approved rows.
+The pipeline is Java code inside the bot. This skill generates that code from the bot's domain types; it does
+not run a Node-side pipeline.
 
 ## Inputs
 
-- The target Urbot project and bot/domain package.
-- The batch name and the graph relationship or attribute it produces.
-- The key columns that identify a row.
-- The generator: an LLM prompt, a deterministic matcher, or both.
-- The confidence or strength semantics for the batch.
+- The target Urbot project and bot profile.
+- The batch name and the graph relationship it produces.
+- The source and target domain types (they must extend `NamedEntity`).
+- The Neo4j relationship type and, optionally, label overrides.
+- The CSV path, key columns, and extra review properties.
+- The pattern mode: `contains` or `none`.
 
 ## Process
 
-1. **Discover.** Run `urbot-discovery` to confirm the bot package, the domain types, and the Neo4j access path.
-2. **Define the batch.** Pick the CSV path (`data/enhancements/<batch>.csv` by default), the key columns, and
-   the relationship type. Record them in the workflow notes.
-3. **Implement generation in Urbot.** The enhancer writes the header and `status=pending` rows; it never writes
-   the graph. Generation skips when the CSV already has reviewed rows.
-4. **Generate and stop.** Produce the CSV, report the row count and path, then stop at `CHECKPOINT: REVIEW`.
-5. **Review in the CSV and Git.** A human sets each row to `approved` or `rejected`, deletes wrong rows, and
-   commits. Run `review-csv.mjs` in review mode to validate structure and counts.
-6. **Gate apply.** Run `review-csv.mjs --mode apply`. It fails while any row is `pending`, when nothing is
-   approved, or when a row is invalid. Do not bypass it.
-7. **Apply.** The Urbot apply step filters `status=approved` (case-insensitive), skips relationships that
-   already exist, records `source` and `reviewedAt`, and reports loaded/skipped/failed counts.
-8. **Verify.** Compile, run the Urbot contract tests, re-run the validator, and spot-check the applied counts.
+1. **Discover.** Run `urbot-discovery` to confirm the bot package, domain types, and Neo4j access path.
+2. **Plan the Java pipeline.** Run the generator without `--approve`. It reads the domain package, resolves the
+   source and target types, and lists every file it will write.
+3. **Approve.** Re-run with `--approve`. The generator writes the batch lifecycle, CSV helper, pipeline
+   service, enhancer, REST controller, and test into `com.embabel.bot.<bot>.data`.
+4. **Generate candidates.** Call the generate path (REST or the Spring bean). It writes `status=pending` rows
+   and never writes the graph.
+5. **Stop at `CHECKPOINT: REVIEW`.** A human reviews the CSV, sets `approved` or `rejected`, deletes wrong rows,
+   and commits. Optionally run `scripts/review-csv.mjs` as a pre-check.
+6. **Apply.** Call the apply path with confirmation. It writes only approved rows, skips existing
+   relationships, records `source` and `reviewedAt`, and reports loaded/skipped/failed counts.
+7. **Verify.** Run `urbot-verification`: compile, contract tests, and a spot check of the applied counts.
+
+## Generator
+
+```bash
+node skills/urbot-data-enhance-pipeline/scripts/apply.mjs \
+  --project <dir> \
+  --bot <bot> \
+  --name <batch> \
+  --source <SourceType> \
+  --target <TargetType> \
+  --relationship <REL_TYPE> \
+  [--match contains|none] \
+  [--csv data/enhancements/<batch>.csv] \
+  [--properties reason,confidence] \
+  [--source-label <Label>] \
+  [--target-label <Label>] \
+  [--approve] [--force]
+```
+
+- `--key` defaults to `sourceId,targetId` and must name exactly those two columns.
+- `--properties` defaults to `reason,confidence`; `strength` and `divergence` are also supported. `reason` is
+  required.
+- Without `--approve` the generator writes nothing and returns the plan.
+- Existing generated files are reported; `--force` overwrites them. The properties file is appended to, never
+  rewritten.
+- `--match contains` generates a deterministic `contains` rule over `NamedEntity.getName()`;
+  `--match none` generates a `TODO` hook that returns no candidates.
+- No LLM call and no prompt template is generated.
+
+## Generated files
+
+```text
+src/main/java/com/embabel/bot/<bot>/data/
+├── EnhancementBatch.java          # generate/apply lifecycle
+├── ReviewCsv.java                 # quoted CSV, duplicate keys, status counts
+├── EnhancementPipeline.java       # discovers batches, generate/apply
+├── <Batch>Enhancer.java           # domain iteration, pattern hook, approved-only apply
+└── DataEnhancementController.java # REST list/generate/apply
+
+src/test/java/com/embabel/bot/<bot>/data/<Batch>EnhancerTest.java
+```
+
+The controller is profile-scoped and disabled by default. Enable it with
+`urbot.data-enhancement.enabled=true`.
+
+## REST surface
+
+```text
+GET  /api/data-enhancements
+POST /api/data-enhancements/{id}/generate
+POST /api/data-enhancements/{id}/apply?confirm=true
+```
+
+There is no force or delete endpoint. Apply without `confirm=true` returns 400. The existing Spring Security
+configuration protects the endpoints.
 
 ## Checkpoints
 
-- `CHECKPOINT: REVIEW` — after generation and before any apply. The human review outcome is required.
-- `CHECKPOINT: APPLY` — before a force apply or any delete. A force apply ignores the status column, prints the
-  rows it would write, and requires explicit approval. It is never automatic.
-
-## Review gate
-
-```bash
-node skills/urbot-data-enhance-pipeline/scripts/review-csv.mjs \
-  --csv data/enhancements/<batch>.csv \
-  --key <key columns> \
-  --mode review
-
-node skills/urbot-data-enhance-pipeline/scripts/review-csv.mjs \
-  --csv data/enhancements/<batch>.csv \
-  --key <key columns> \
-  --mode apply
-```
-
-`review` reports structure errors and per-status counts. `apply` additionally fails on pending rows, on zero
-approved rows, and on any invalid row.
+- `CHECKPOINT: REVIEW` — required between generation and apply.
+- `CHECKPOINT: APPLY` — required before enabling the REST controller or running apply.
+- `CHECKPOINT: VERIFICATION REPORT` — closes the flow.
 
 ## Output
 
-A report with the batch path, row counts by status, validator result, apply result, verification commands, and
-the files changed in Git.
+A report with the generated files, batch id, CSV path, status counts, apply result, verification commands, and
+the Git diff.
 
 ## Do not
 
-- Write graph data during generation.
-- Apply `pending` or `rejected` rows.
+- Implement the pipeline in Node or claim the validator is the pipeline.
+- Write the graph during generation.
+- Apply pending or rejected rows.
+- Add a force or delete endpoint, a UI, an admin backend, or a review table.
 - Auto-approve rows or let the agent review its own output.
-- Run a force apply or delete without explicit approval.
-- Add a UI, admin endpoint, approval table, or a Neo4j driver to Manna.
-- Create a second runtime, domain model, or persistence layer.
+- Generate LLM calls or prompt templates from this skill.
+- Create a second runtime or domain model.
 
 ## References
 
 - `references/csv-contract.md` — columns, statuses, keys, and quoting.
-- `references/urbot-implementation.md` — the expected Urbot-side Java shape.
+- `references/urbot-implementation.md` — the generated Java contract and extension points.

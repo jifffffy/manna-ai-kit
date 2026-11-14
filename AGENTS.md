@@ -23,7 +23,8 @@ The kit has **zero npm dependencies** — do not run `npm install`; the scripts 
 - `npm run check:urbot-only` — asserts the main path is Urbot-only and no legacy assets or references remain.
 - `npm run test:init` — checks the project init contract, tag selection, clone/reuse, overwrite copy, and the
   single `AGENTS.md`.
-- `npm run test:data` — checks the review CSV validator, the apply gate, and the status counts.
+- `npm run test:data` — checks the generator, the review CSV validator, the apply gate, and the status counts.
+- `npm run test:data:checkout -- --project <dir>` — generates the pipeline into a copied checkout, compiles it, and runs its unit test.
 - `npm test` — runs `check:positioning`, `check:urbot-only`, the routing evals, the profile check, the tool
   check, the domain-design check, the data-enhancement check, and the one-step init check.
 

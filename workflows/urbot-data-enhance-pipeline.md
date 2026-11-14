@@ -1,61 +1,58 @@
 # Workflow: Urbot Data Enhancement Pipeline
 
-**Goal:** enrich the Urbot graph from generated candidates without letting unreviewed data become durable
-knowledge.
+**Goal:** generate a Java data-enhancement pipeline for a Urbot bot, review its CSV output, and apply only
+approved rows.
 
 ## Phase 1 scope
 
-The flow is review-gated: generation writes a CSV, a human reviews it, and apply loads only approved rows.
+The pipeline is Java code in the bot package. The flow is review-gated: generation writes a CSV, a human
+reviews it, and apply loads approved rows only.
 
 ## Ordered steps
 
 1. Run `urbot-discovery` to confirm the bot package, domain types, and Neo4j access path.
-2. Define the batch: CSV path, key columns, relationship or attribute, and the confidence/strength meaning.
-3. Generate candidates with `urbot-data-enhance-pipeline`: the header plus `status=pending` rows, no graph
-   writes. Skip when the CSV already contains reviewed rows.
-4. Report the CSV path and counts, then stop at `CHECKPOINT: REVIEW`.
-5. A human reviews the CSV, sets `approved` or `rejected`, deletes wrong rows, and commits.
-6. Validate the review:
+2. Plan the pipeline with `urbot-data-enhance-pipeline`:
+   - batch name, source and target `NamedEntity` types, relationship type;
+   - CSV path, key columns, and review properties;
+   - pattern mode (`contains` or `none`).
+3. Run the generator without `--approve` and review the plan.
+4. Re-run with `--approve`; the generator writes the Java pipeline, REST controller, test, and properties.
+5. Compile with `./mvnw -q -DskipTests compile` and run `./mvnw -q test`.
+6. Generate candidates through the REST endpoint or the Spring bean; report the CSV path and pending count.
+7. Stop at `CHECKPOINT: REVIEW`. A human sets `approved` or `rejected`, deletes wrong rows, and commits.
+8. Optionally validate the review:
 
    ```bash
    node skills/urbot-data-enhance-pipeline/scripts/review-csv.mjs \
      --csv data/enhancements/<batch>.csv \
-     --key <key columns> \
-     --mode review
-   ```
-
-7. Gate apply:
-
-   ```bash
-   node skills/urbot-data-enhance-pipeline/scripts/review-csv.mjs \
-     --csv data/enhancements/<batch>.csv \
-     --key <key columns> \
+     --key sourceId,targetId \
      --mode apply
    ```
 
-   Do not apply when this fails.
-8. Apply approved rows only. Skip existing relationships, record `source` and `reviewedAt`, and report
-   loaded/skipped/failed counts.
-9. Run `urbot-verification`: `./mvnw -q -DskipTests compile` and `./mvnw -q test`, plus the CSV validator again.
-10. Stop at `CHECKPOINT: VERIFICATION REPORT` with the counts and the changed files.
+9. Stop at `CHECKPOINT: APPLY`, enable `urbot.data-enhancement.enabled=true` if needed, and apply with
+   `confirm=true`. The response reports loaded/skipped/failed counts.
+10. Run `urbot-verification`, then stop at `CHECKPOINT: VERIFICATION REPORT` with the counts and the Git diff.
 
-## Checkpoints
+## Generated surface
 
-- `CHECKPOINT: REVIEW` — required between generation and apply.
-- `CHECKPOINT: APPLY` — required before force apply or delete. A force apply ignores status, prints the rows it
-  would write, and is never automatic.
-- `CHECKPOINT: VERIFICATION REPORT` — closes the flow.
+```text
+GET  /api/data-enhancements
+POST /api/data-enhancements/{id}/generate
+POST /api/data-enhancements/{id}/apply?confirm=true
+```
+
+There is no force, delete, or status-rewrite endpoint.
 
 ## Output
 
-A report with the batch path, status counts, validator results, apply results, verification commands, and the
-Git diff.
+A report with the generated files, batch id, CSV path, status counts, apply result, verification commands, and
+the Git diff.
 
 ## Do not
 
+- Implement the pipeline in Node.
 - Write the graph during generation.
-- Apply pending or rejected rows.
-- Auto-approve or let the agent approve its own output.
-- Run a force apply or delete without explicit approval.
-- Add a UI, admin endpoint, or approval table.
+- Apply pending or rejected rows without review.
+- Add a UI, admin backend, approval table, force endpoint, or delete endpoint.
+- Generate an LLM call or prompt template from this workflow.
 - Create a second runtime or domain model.

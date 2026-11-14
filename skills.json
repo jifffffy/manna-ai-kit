@@ -62,7 +62,7 @@
       "version": "0.1.0",
       "mode": "review",
       "path": "skills/urbot-data-enhance-pipeline",
-      "description": "Generate reviewable data enhancement CSV batches, gate them on human review, and apply only approved rows."
+      "description": "Generate the Java data-enhancement pipeline for a Urbot bot, with CSV review and approved-only apply."
     }
   ]
 }
