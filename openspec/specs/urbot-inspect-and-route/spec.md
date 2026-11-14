@@ -85,12 +85,13 @@ The router SHALL map intents to workflows as follows: new project or bot to `urb
 new/modified profile to `urbot-profile-change`; persona/objective/behaviour change to
 `urbot-prompt-tuning`; Tool/MCP/Subagent/Reference addition to `urbot-tool-development`; domain
 discovery/modeling (color modeling + DDD) to `urbot-domain-design`; NamedEntity/Relations/Memory addition to
-`urbot-domain-memory`; test/compile/regression to `urbot-verification`. An ambiguous request SHALL be resolved
-by reading the project and asking exactly one precise question.
+`urbot-domain-memory`; test/compile/regression to `urbot-verification`; data enhancement, CSV review, or
+approved-data apply to `urbot-data-enhance-pipeline`. An ambiguous request SHALL be resolved by reading the
+project and asking exactly one precise question.
 
 #### Scenario: Each known intent selects its workflow
 
-- **WHEN** the request matches one of the seven known intents
+- **WHEN** the request matches one of the eight known intents
 - **THEN** the router selects the corresponding workflow from the routing table
 - **AND** reports only that workflow and its skills
 
@@ -122,28 +123,6 @@ Bot package, Persona, Objective, Domain types, and Tools.
 - **THEN** its report contains every field listed in this requirement
 - **AND** fields that are absent in the project are reported as absent rather than invented
 
-### Requirement: Six skills and six workflows exist as skeletons
-
-Manna SHALL provide six skills (`urbot-discovery`, `urbot-profile`, `urbot-tool`,
-`urbot-domain-memory`, `urbot-prompt`, `urbot-verification`) each with `SKILL.md`, `references/`, and
-`scripts/`, and six workflows (`urbot-bootstrap`, `urbot-profile-change`, `urbot-tool-development`,
-`urbot-domain-memory`, `urbot-prompt-tuning`, `urbot-verification`) declared in
-`workflows/routing/pipeline.json`. Phase 1 SHALL implement only `urbot-discovery` read-only behavior and the
-read-only paths of `urbot-bootstrap` and `urbot-verification`; the remaining skills and workflows are
-documentation skeletons.
-
-#### Scenario: Skill skeletons are present and routed
-
-- **WHEN** the kit is validated
-- **THEN** each of the six skill directories exists with its required files
-- **AND** each non-router skill has a route in `workflows/routing/pipeline.json`
-
-#### Scenario: Phase 1 does not implement modification workflows
-
-- **WHEN** a request would modify Urbot during Phase 1
-- **THEN** the workflow stops at a read-only inspection or a documented checkpoint
-- **AND** does not write to the Urbot project
-
 ### Requirement: Run state is minimal and optional
 
 Manna SHALL not create long-lived state by default. If the user opts in, it MAY write
@@ -161,23 +140,6 @@ data, hash Urbot source, or replace Git. `.manna-run/` SHALL be gitignored by de
 
 - **WHEN** a `.manna-run/` directory is created
 - **THEN** it is excluded by `.gitignore`
-
-### Requirement: Golden routing evals pass
-
-The kit SHALL include five golden routing evals covering new project, profile/prompt, tool, domain/memory,
-and verification requests. A routing eval runner SHALL assert that each fixture request selects its expected
-workflow.
-
-#### Scenario: All five evals route correctly
-
-- **WHEN** the routing eval runner executes the five fixtures
-- **THEN** every fixture selects the workflow declared by its eval
-- **AND** the runner exits successfully
-
-#### Scenario: A wrong route fails the runner
-
-- **WHEN** a fixture routes to a workflow other than its expected workflow
-- **THEN** the runner reports the mismatch and exits non-zero
 
 ### Requirement: One-step init command
 
@@ -272,3 +234,42 @@ route. A request phrased as "design/model the domain" SHALL select `urbot-domain
 - **WHEN** the request does not clearly match one intent
 - **THEN** the output contains one precise question
 - **AND** it does not select a workflow by guessing
+
+### Requirement: Nine skills and eight workflows exist
+
+Manna SHALL provide nine skills (`urbot-router`, `urbot-discovery`, `urbot-profile`, `urbot-tool`,
+`urbot-domain-design`, `urbot-domain-memory`, `urbot-prompt`, `urbot-verification`, and
+`urbot-data-enhance-pipeline`) each with `SKILL.md`, `references/`, and `scripts/`, and eight workflows
+(`urbot-bootstrap`, `urbot-profile-change`, `urbot-tool-development`, `urbot-domain-design`,
+`urbot-domain-memory`, `urbot-prompt-tuning`, `urbot-verification`, and `urbot-data-enhance-pipeline`)
+declared in `workflows/routing/pipeline.json`. The data-enhancement skill SHALL ship a working reviewer script;
+the remaining skills and workflows remain documentation skeletons.
+
+#### Scenario: Skill skeletons are present and routed
+
+- **WHEN** the kit is validated
+- **THEN** each of the nine skill directories exists with its required files
+- **AND** each non-router skill has a route in `workflows/routing/pipeline.json`
+
+#### Scenario: Phase 1 does not implement modification workflows
+
+- **WHEN** a request would modify Urbot during Phase 1
+- **THEN** the workflow stops at a read-only inspection or a documented checkpoint
+- **AND** does not write to the Urbot project
+
+### Requirement: Golden routing evals cover every route
+
+The kit SHALL include one golden routing eval per route, covering new project, profile/prompt, tool,
+domain design, domain/memory, verification, and data enhancement. A routing eval runner SHALL assert that each
+fixture request selects its expected workflow.
+
+#### Scenario: Every eval routes correctly
+
+- **WHEN** the routing eval runner executes the fixtures
+- **THEN** every fixture selects the workflow declared by its eval
+- **AND** the runner exits successfully
+
+#### Scenario: A wrong route fails the runner
+
+- **WHEN** a fixture routes to a workflow other than its expected workflow
+- **THEN** the runner reports the mismatch and exits non-zero

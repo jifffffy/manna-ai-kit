@@ -25,9 +25,9 @@ evals. No legacy copy SHALL remain in the repository.
 
 ### Requirement: The skill inventory is Urbot-only
 
-The skills directory SHALL contain only the seven Urbot skills: `urbot-router`, `urbot-discovery`,
-`urbot-profile`, `urbot-tool`, `urbot-domain-memory`, `urbot-prompt`, and `urbot-verification`. No
-`manna-*` skill directory SHALL remain.
+The skills directory SHALL contain only the nine Urbot skills: `urbot-router`, `urbot-discovery`,
+`urbot-profile`, `urbot-tool`, `urbot-domain-design`, `urbot-domain-memory`, `urbot-prompt`,
+`urbot-verification`, and `urbot-data-enhance-pipeline`. No `manna-*` skill directory SHALL remain.
 
 #### Scenario: Router is renamed and rewritten
 
@@ -43,7 +43,7 @@ The skills directory SHALL contain only the seven Urbot skills: `urbot-router`, 
 
 ### Requirement: The workflow inventory is Urbot-only
 
-The workflows directory SHALL contain only the six Urbot workflow documents and the routing directory. The
+The workflows directory SHALL contain only the eight Urbot workflow documents and the routing directory. The
 eight legacy workflow documents SHALL be removed.
 
 #### Scenario: Legacy workflows are absent
@@ -51,7 +51,7 @@ eight legacy workflow documents SHALL be removed.
 - **WHEN** the workflows directory is listed
 - **THEN** `requirement-to-slice.md`, `feature-add.md`, `feature-modify.md`, `tool-integration.md`,
   `memory-tuning.md`, `data-pipeline.md`, `quality-gate.md`, and `release.md` do not exist
-- **AND** the six `urbot-*` workflow documents remain
+- **AND** the eight `urbot-*` workflow documents remain
 
 #### Scenario: Routing is Urbot-only
 
@@ -62,14 +62,14 @@ eight legacy workflow documents SHALL be removed.
 ### Requirement: Manifests and modes are Urbot-only
 
 `skills.json`, `.well-known/agent-skills/index.json`, `.claude-plugin/plugin.json`, and
-`policies/modes.json` SHALL list only the seven Urbot skills. The validator's router exception SHALL be
+`policies/modes.json` SHALL list only the nine Urbot skills. The validator's router exception SHALL be
 `urbot-router`.
 
 #### Scenario: Manifests contain no legacy names
 
 - **WHEN** the manifests are parsed
 - **THEN** no `manna-*` skill entry exists
-- **AND** all seven Urbot skills are present
+- **AND** all nine Urbot skills are present
 
 #### Scenario: Validator accepts the Urbot router
 
@@ -126,7 +126,7 @@ not ship any legacy path.
 
 - **WHEN** a contributor reads `AGENTS.md` or `README.md`
 - **THEN** the document says the legacy files are deleted and the main path is Urbot-only
-- **AND** it lists the seven Urbot skills and six Urbot workflows
+- **AND** it lists the nine Urbot skills and eight Urbot workflows
 
 ### Requirement: The change is verified
 
