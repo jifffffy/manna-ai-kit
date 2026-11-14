@@ -38,6 +38,7 @@ not perform the change itself.
 | Discover/model a domain (color modeling + DDD) | `urbot-domain-design` |
 | Add NamedEntity/Relations/Memory | `urbot-domain-memory` |
 | Test/compile/regression | `urbot-verification` |
+| Data enhancement / CSV review / approved-data apply | `urbot-data-enhance-pipeline` |
 
 For an ambiguous request, read the project and ask exactly one precise question. Do not split a request into
 multiple workflows or run them concurrently.

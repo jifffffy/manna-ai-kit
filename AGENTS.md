@@ -23,15 +23,16 @@ The kit has **zero npm dependencies** — do not run `npm install`; the scripts 
 - `npm run check:urbot-only` — asserts the main path is Urbot-only and no legacy assets or references remain.
 - `npm run test:init` — checks the project init contract, tag selection, clone/reuse, overwrite copy, and the
   single `AGENTS.md`.
+- `npm run test:data` — checks the review CSV validator, the apply gate, and the status counts.
 - `npm test` — runs `check:positioning`, `check:urbot-only`, the routing evals, the profile check, the tool
-  check, the domain-design check, and the one-step init check.
+  check, the domain-design check, the data-enhancement check, and the one-step init check.
 
 CI is `validate` → `lock:check` → `test`. Run all three before calling work done.
 
 ### Urbot-only main path
 The retired generator, templates, schemas, examples, tests, and all `manna-*` skills/workflows have been
-deleted. The main path is Urbot-only: `generator/manna.mjs`, `generator/urbot/`, the eight `urbot-*` skills,
-the six `urbot-*` workflows, and the retained orchestration spine. Do not reintroduce a legacy path.
+deleted. The main path is Urbot-only: `generator/manna.mjs`, `generator/urbot/`, the nine `urbot-*` skills,
+the eight `urbot-*` workflows, and the retained orchestration spine. Do not reintroduce a legacy path.
 
 ### Adding or renaming a skill
 1. `skills/<id>/SKILL.md` copied from `shared/SKILL-template.md`. Frontmatter `name` must equal the directory.
@@ -87,11 +88,11 @@ The skill set is Urbot-only. Add `urbot-*` skills and keep `skills.json`, `.well
 #### Urbot-only assets
 - `skills/urbot-router`, `skills/urbot-discovery`, `skills/urbot-profile`, `skills/urbot-tool`,
   `skills/urbot-domain-design`, `skills/urbot-domain-memory`, `skills/urbot-prompt`,
-  `skills/urbot-verification`.
+  `skills/urbot-verification`, `skills/urbot-data-enhance-pipeline`.
 - `workflows/urbot-bootstrap.md`, `workflows/urbot-profile-change.md`,
   `workflows/urbot-prompt-tuning.md`, `workflows/urbot-tool-development.md`,
   `workflows/urbot-domain-design.md`, `workflows/urbot-domain-memory.md`,
-  `workflows/urbot-verification.md`.
+  `workflows/urbot-verification.md`, `workflows/urbot-data-enhance-pipeline.md`.
 
 #### Deleted
 - `legacy/` (the retired generator, templates, examples, schemas, tests, and old golden evals).

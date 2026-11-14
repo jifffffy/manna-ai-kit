@@ -104,7 +104,7 @@ safety, lock, and golden routing eval mechanism are the spine that stays intact.
 
 - **Retain**: routing architecture, routing pipeline structure, validator, manifests, plugin metadata, modes,
   tool-safety policy, kit lock, golden routing eval mechanism, document format.
-- **Urbot-only assets**: seven `urbot-*` skills and six `urbot-*` workflows, plus the Urbot CLI.
+- **Urbot-only assets**: nine `urbot-*` skills and eight `urbot-*` workflows, plus the Urbot CLI.
 - **Deleted**: `legacy/`, the eleven `manna-*` skills, the eight legacy workflows, `shared/patterns/`,
   `shared/schemas/`, `.manna` project artifacts, `project.designMode`, and `F-001` IDs.
 

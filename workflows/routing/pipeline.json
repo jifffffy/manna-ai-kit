@@ -125,6 +125,24 @@
         "\u9a8c\u8bc1",
         "\u56de\u5f52"
       ]
+    },
+    {
+      "id": "urbot-data-enhance-pipeline",
+      "title": "Generate, review, and apply a data enhancement batch",
+      "workflow": "workflows/urbot-data-enhance-pipeline.md",
+      "skills": [
+        "urbot-discovery",
+        "urbot-data-enhance-pipeline",
+        "urbot-verification"
+      ],
+      "triggers": [
+        "data enhancement",
+        "enhancement pipeline",
+        "review csv",
+        "approved data",
+        "\u4eba\u5de5\u5ba1\u6838",
+        "\u6570\u636e\u589e\u5f3a"
+      ]
     }
   ],
   "skillRoutes": {
@@ -134,6 +152,7 @@
     "urbot-tool": "urbot-tool-development",
     "urbot-domain-design": "urbot-domain-design",
     "urbot-domain-memory": "urbot-domain-memory",
-    "urbot-verification": "urbot-verification"
+    "urbot-verification": "urbot-verification",
+    "urbot-data-enhance-pipeline": "urbot-data-enhance-pipeline"
   }
 }

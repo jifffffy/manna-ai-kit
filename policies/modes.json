@@ -25,7 +25,8 @@
     "urbot-domain-memory": "review",
     "urbot-prompt": "review",
     "urbot-verification": "suggest",
-    "urbot-domain-design": "review"
+    "urbot-domain-design": "review",
+    "urbot-data-enhance-pipeline": "review"
   },
   "safeSet": [
     "formatting and import cleanup inside a Urbot bot package",

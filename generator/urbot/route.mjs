@@ -66,6 +66,19 @@ export const ROUTE_DETAILS = {
     skills: ["urbot-discovery", "urbot-verification"],
     targetFiles: [],
     verificationCommands: DEFAULT_COMMANDS
+  },
+  "urbot-data-enhance-pipeline": {
+    skills: ["urbot-discovery", "urbot-data-enhance-pipeline", "urbot-verification"],
+    targetFiles: [
+      "data/enhancements/<batch>.csv",
+      "src/main/java/com/embabel/bot/<botname>/data/<Batch>Enhancer.java",
+      "src/main/java/com/embabel/bot/<botname>/data/<Batch>ReviewCsv.java",
+      "src/test/java/com/embabel/bot/<botname>/data/<Batch>EnhancerTest.java"
+    ],
+    verificationCommands: [
+      ...DEFAULT_COMMANDS,
+      "node skills/urbot-data-enhance-pipeline/scripts/review-csv.mjs --csv <batch.csv> --key <keys> --mode apply"
+    ]
   }
 };
 
@@ -77,6 +90,7 @@ const INTENT_WORDS = {
   domainDesign: ["domain model", "domain design", "color modeling", "color-modeling", "ddd", "domain-driven", "bounded context", "aggregate", "领域模型", "领域设计", "领域驱动", "聚合"],
   domainMemory: ["namedentity", "named entity", "relation", "memory", "domain", "实体", "关系", "记忆", "领域"],
   profile: ["profile"],
+  dataEnhance: ["data enhancement", "enhancement pipeline", "enhance data", "review csv", "approved data", "\u4eba\u5de5\u5ba1\u6838", "\u6570\u636e\u589e\u5f3a"],
   verification: [
     "test",
     "compile",
@@ -122,12 +136,13 @@ export function routeRequest({ directoryExists, request, discovery = {} }) {
   if (domainDesign) matches.push("urbot-domain-design");
   if (!domainDesign && hasAny(text, INTENT_WORDS.domainMemory)) matches.push("urbot-domain-memory");
   if (profileCreation || hasAny(text, INTENT_WORDS.profile)) matches.push("urbot-profile-change");
+  if (hasAny(text, INTENT_WORDS.dataEnhance)) matches.push("urbot-data-enhance-pipeline");
   if (hasAny(text, INTENT_WORDS.verification)) matches.push("urbot-verification");
 
   const unique = [...new Set(matches)];
   if (unique.length === 0) {
     return question(
-      "Which Urbot change do you want: bootstrap, profile, prompt, tool, domain design, domain/memory, or verification?"
+      "Which Urbot change do you want: bootstrap, profile, prompt, tool, domain design, domain/memory, verification, or data enhancement?"
     );
   }
   if (unique.length > 1) {

@@ -12,7 +12,8 @@ const EXPECTED_ROUTES = [
   "urbot-tool-development",
   "urbot-domain-design",
   "urbot-domain-memory",
-  "urbot-verification"
+  "urbot-verification",
+  "urbot-data-enhance-pipeline"
 ];
 const errors = [];
 
@@ -26,8 +27,8 @@ const evalFiles = fs
   .filter((name) => name.startsWith("urbot-") && name.endsWith(".eval.json"))
   .sort();
 
-if (evalFiles.length !== 6) {
-  errors.push(`expected 6 golden routing evals, found ${evalFiles.length}`);
+if (evalFiles.length !== 7) {
+  errors.push(`expected 7 golden routing evals, found ${evalFiles.length}`);
 }
 
 for (const name of evalFiles) {

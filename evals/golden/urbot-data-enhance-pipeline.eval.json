@@ -1,0 +1,16 @@
+{
+  "id": "urbot-data-enhance-pipeline",
+  "workflow": "urbot-data-enhance-pipeline",
+  "fixture": "evals/fixtures/urbot/data-enhance.json",
+  "expected": {
+    "must_detect": ["data enhancement intent", "review intent"],
+    "must_create": [],
+    "must_do": ["select urbot-data-enhance-pipeline", "report the review gate"],
+    "must_not": ["apply pending rows", "apply without review"]
+  },
+  "pass_criteria": "fixture routes to urbot-data-enhance-pipeline and the review gate is reported",
+  "triggers": {
+    "should": ["review the enhancement batch", "apply approved data"],
+    "should_not": ["add a tool", "add a profile"]
+  }
+}

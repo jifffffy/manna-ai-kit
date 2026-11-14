@@ -56,6 +56,13 @@
       "mode": "suggest",
       "path": "skills/urbot-verification",
       "description": "Report Urbot project state and build, run, test, and verification commands without modifying source."
+    },
+    {
+      "name": "urbot-data-enhance-pipeline",
+      "version": "0.1.0",
+      "mode": "review",
+      "path": "skills/urbot-data-enhance-pipeline",
+      "description": "Generate reviewable data enhancement CSV batches, gate them on human review, and apply only approved rows."
     }
   ]
 }

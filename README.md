@@ -219,11 +219,11 @@ urbot.chat.llm.temperature=0.0
 
 - `skills/urbot-router`, `skills/urbot-discovery`, `skills/urbot-profile`, `skills/urbot-tool`,
   `skills/urbot-domain-design`, `skills/urbot-domain-memory`, `skills/urbot-prompt`,
-  `skills/urbot-verification`.
+  `skills/urbot-verification`, `skills/urbot-data-enhance-pipeline`.
 - `workflows/urbot-bootstrap.md`, `workflows/urbot-profile-change.md`,
   `workflows/urbot-prompt-tuning.md`, `workflows/urbot-tool-development.md`,
   `workflows/urbot-domain-design.md`, `workflows/urbot-domain-memory.md`,
-  `workflows/urbot-verification.md`.
+  `workflows/urbot-verification.md`, `workflows/urbot-data-enhance-pipeline.md`.
 
 ### Deleted
 
@@ -260,8 +260,8 @@ See `policies/tool-safety.md`, `workflows/routing/pipeline.json`, and `docs/arch
 ```text
 manna-ai-kit/
 ├── AGENTS.md                  # repo + shipped instruction layer
-├── skills/                    # 8 Urbot skills (router + 7 workflow skills)
-├── workflows/                 # 7 Urbot workflows + routing
+├── skills/                    # 9 Urbot skills (router + 8 workflow skills)
+├── workflows/                 # 8 Urbot workflows + routing
 ├── policies/                  # modes, tool safety, approval checkpoints
 ├── shared/                    # SKILL-template.md (document format)
 ├── generator/                 # Urbot CLI (manna.mjs + urbot/)

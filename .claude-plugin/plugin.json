@@ -16,7 +16,8 @@
     "skills/urbot-domain-design",
     "skills/urbot-domain-memory",
     "skills/urbot-prompt",
-    "skills/urbot-verification"
+    "skills/urbot-verification",
+    "skills/urbot-data-enhance-pipeline"
   ],
   "commands": []
 }
