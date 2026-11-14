@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 export const KIT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 const COPY_SET = [
-  ".opencode",
   "skills",
   "workflows",
   "policies",
@@ -14,9 +13,7 @@ const COPY_SET = [
   "generator",
   "skills.json",
   ".well-known",
-  ".claude-plugin",
-  "openspec/config.yaml",
-  "openspec/specs"
+  ".claude-plugin"
 ];
 
 const SKIP_NAMES = new Set([".git", "node_modules", "target", ".DS_Store", ".manna-run"]);

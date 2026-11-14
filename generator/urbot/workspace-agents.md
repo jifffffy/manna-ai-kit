@@ -7,8 +7,8 @@ automatically. Manna owns the development flow; Urbot remains the only runtime a
 
 - Project root: the Urbot checkout (`pom.xml`, `src/main/java/com/embabel/urbot/`, `mvnw`)
 - Manna kit: `skills/`, `workflows/`, `policies/`, `shared/`, `docs/`, `generator/`
-- OpenCode discovery: `.opencode/commands/` and `.opencode/skills/`
-- OpenSpec root: `openspec/` (`config.yaml` and `specs/`)
+- OpenCode discovery: `.opencode/skills/` (the Manna skills)
+- No OpenSpec root: this workspace follows the Manna workflows, not an OpenSpec change flow
 
 All Urbot source paths are relative to {{URBOT_PROJECT}}.
 
@@ -18,7 +18,7 @@ All Urbot source paths are relative to {{URBOT_PROJECT}}.
 2. Use the matching document in `workflows/` for that flow.
 3. Use the skill references and scripts under `skills/`.
 4. Run the global `manna` command, or `node generator/manna.mjs` in this workspace.
-5. Use the `opsx` commands from `.opencode/commands/` for OpenSpec changes.
+5. Follow the selected Manna workflow document; do not add an OpenSpec change for product work.
 
 ## Build, run, and test
 

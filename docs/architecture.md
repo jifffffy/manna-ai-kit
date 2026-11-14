@@ -57,9 +57,10 @@ manna init <project>
 
 It resolves the project directory and makes it both the Urbot checkout and the Manna workspace: the directory
 is cloned when missing or empty, reused when it is already a Urbot checkout, and rejected otherwise. The local
-kit (`AGENTS.md`, `.opencode/`, `skills/`, `workflows/`, `policies/`, `shared/`, `docs/`, `generator/`,
-`openspec/`) is then copied into the project root, overwriting kit-owned files; the Urbot `AGENTS.md` is
-replaced by the Manna-owned file. Open that directory in OpenCode to use the local skills and commands. The
+kit (`AGENTS.md`, `.opencode/skills/`, `skills/`, `workflows/`, `policies/`, `shared/`, `docs/`,
+`generator/`) is then copied into the project root, overwriting kit-owned files; the Urbot `AGENTS.md` is
+replaced by the Manna-owned file. The workspace does not copy `openspec/` or the OpenSpec commands; the Manna
+workflows are the development flow. Open that directory in OpenCode to use the local skills and commands. The
 command prints the workspace, copied kit, source record, entry point, and next step. Optional overrides:
 `--repo`, `--ref`, and `--write-state`.
 

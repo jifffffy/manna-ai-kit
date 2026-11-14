@@ -116,21 +116,21 @@ It creates the project directory as the Urbot checkout, then copies the local ki
 
 ```text
 demo/
-├── AGENTS.md          # Manna-owned entry point (replaces the Urbot file)
-├── .opencode/         # commands + OpenCode skills
-├── skills/            # local Manna skills
-├── workflows/         # local workflows
+├── AGENTS.md           # Manna-owned entry point (replaces the Urbot file)
+├── .opencode/skills/   # OpenCode-discoverable Manna skills
+├── skills/             # local Manna skills
+├── workflows/          # local workflows
 ├── policies/ shared/ docs/ generator/
-├── openspec/          # config + specs
 ├── pom.xml, mvnw, src/ # Urbot checkout
-└── .git/              # Urbot history
+└── .git/               # Urbot history
 ```
 
 It uses `https://github.com/jifffffy/urbot` and the latest semver tag (falling back to `main`). The project
 argument is required: the directory is cloned when missing or empty, reused when it is already a Urbot
 checkout, and rejected when it is not. Kit-owned files, including `AGENTS.md`, are overwritten on every run, so
-re-running refreshes the Manna layer. It does not modify Urbot source or configuration, does not route a
-request, and does not apply a workflow. Optional overrides: `--repo`, `--ref`, and `--write-state`.
+re-running refreshes the Manna layer. It does not copy `openspec/` or the `opsx` commands: the workspace uses
+the Manna workflows. It does not modify Urbot source or configuration, does not route a request, and does not
+apply a workflow. Optional overrides: `--repo`, `--ref`, and `--write-state`.
 
 The explicit commands remain:
 

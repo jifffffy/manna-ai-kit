@@ -60,7 +60,7 @@ manna init demo
 
 - project: `./demo` (open it in OpenCode)
 - Urbot checkout: the project root itself, cloned when missing and reused when present
-- local kit: `skills/`, `workflows/`, `policies/`, `.opencode/`, `generator/`, `openspec/`
+- local kit: `skills/`, `workflows/`, `policies/`, `.opencode/skills/`, `generator/`
 - `AGENTS.md`: replaced with the Manna-owned file, so exactly one instruction file remains
 - kit copy: existing kit-owned files are overwritten, so re-running refreshes the Manna layer
 - repository: `https://github.com/jifffffy/urbot`
@@ -92,11 +92,10 @@ directory:
 ```text
 demo/
 ├── AGENTS.md           # Manna-owned entry point (replaces the Urbot file)
-├── .opencode/          # commands + OpenCode skills
+├── .opencode/skills/   # OpenCode-discoverable Manna skills
 ├── skills/             # local Manna skills
 ├── workflows/          # local workflows
 ├── policies/ shared/ docs/ generator/
-├── openspec/           # config + specs
 ├── pom.xml, mvnw, src/ # Urbot checkout
 └── .git/               # Urbot history
 ```
@@ -104,7 +103,8 @@ demo/
 Open `./demo` in OpenCode. The single `AGENTS.md` carries the Manna flow plus the Urbot build, run, test, and
 gotcha guidance. Kit-owned files are overwritten on every run, so `manna init demo` is also the refresh
 command. Files outside the copy set are left alone, an existing `.gitignore` is not rewritten (`.manna-run/`
-goes to `.git/info/exclude`), and the Manna kit root is rejected as a project.
+goes to `.git/info/exclude`), and the Manna kit root is rejected as a project. The workspace does not use
+OpenSpec and gets no `openspec/` directory or `opsx` commands; the Manna workflows are the flow.
 
 ---
 

@@ -13,14 +13,13 @@ the Urbot checkout itself. There SHALL be no nested `urbot/` directory inside th
 contain the Urbot checkout (`pom.xml`, `src/main/java/com/embabel/urbot/`) plus:
 
 - a single Manna-owned `AGENTS.md`;
-- `.opencode/` with commands and skills;
+- `.opencode/skills/` with the Manna skills;
 - `skills/`, `workflows/`, `policies/`, `shared/`, `docs/`, `generator/`;
 - `skills.json`, `.well-known/`, `.claude-plugin/`;
-- `openspec/config.yaml` and `openspec/specs/`;
 - local ignore entries for `.manna-run/` recorded outside tracked files.
 
 The workspace SHALL NOT copy kit-maintenance assets: `scripts/dev/`, `evals/`, `package.json`, `skills.lock`,
-or `openspec/changes/`.
+or `openspec/`. It SHALL NOT contain an OpenSpec root, `.opencode/commands/`, or OpenSpec skills.
 
 #### Scenario: New workspace contains the kit and Urbot
 
@@ -38,22 +37,22 @@ or `openspec/changes/`.
 
 ### Requirement: OpenCode discovery
 
-The workspace SHALL provide the OpenCode commands from `.opencode/commands/` and skills from
-`.opencode/skills/`. The Manna skills SHALL also be available to OpenCode's skill loader under
-`.opencode/skills/<skill-id>/SKILL.md`, in addition to the canonical `skills/` copy.
+The workspace SHALL provide the Manna skills to OpenCode's skill loader under
+`.opencode/skills/<skill-id>/SKILL.md`, in addition to the canonical `skills/` copy. It SHALL NOT copy the
+OpenSpec commands or OpenSpec skills from the kit.
 
 #### Scenario: OpenCode sees the local tools
 
 - **WHEN** the workspace is opened in OpenCode
-- **THEN** the `opsx` commands are available from `.opencode/commands/`
-- **AND** the Manna skills are discoverable under `.opencode/skills/`
+- **THEN** the Manna skills are discoverable under `.opencode/skills/`
 - **AND** the canonical skill documentation remains under `skills/`
+- **AND** no `.opencode/commands/` or OpenSpec skill directory is present
 
-#### Scenario: OpenSpec root is present
+#### Scenario: No OpenSpec root is copied
 
-- **WHEN** an `opsx` command runs in the workspace
-- **THEN** `openspec/config.yaml` and `openspec/specs/` exist at the workspace root
-- **AND** the kit's archived changes are not copied
+- **WHEN** `manna init demo` completes
+- **THEN** `openspec/` does not exist in the workspace
+- **AND** the workspace guidance points at the Manna workflows instead
 
 ### Requirement: Workspace is tooling, not a second application
 
@@ -75,19 +74,20 @@ domain model, or a second persistence layer.
 
 ### Requirement: Package ships the copy inputs
 
-The kit package SHALL include `.opencode/`, `openspec/config.yaml`, `openspec/specs/`, and the workspace
-`AGENTS.md` template so an installed `manna` command can create the workspace without the kit source checkout.
+The kit package SHALL include `skills/`, `workflows/`, `policies/`, `shared/`, `docs/`, `generator/`, the
+manifests, and the workspace `AGENTS.md` template so an installed `manna` command can create the workspace
+without the kit source checkout.
 
 #### Scenario: Installed CLI can copy
 
 - **WHEN** `manna` runs from an installed package rather than the kit repository
-- **THEN** the workspace copy finds the OpenCode commands, OpenSpec root, and AGENTS template
+- **THEN** the workspace copy finds the skills, workflows, policies, generator, and AGENTS template
 
 #### Scenario: Verification checks the workspace
 
 - **WHEN** the workspace test runs
-- **THEN** it asserts the copy set, the generated AGENTS paths, the `.opencode` skills, the OpenSpec root, and
-  the absence of kit-maintenance assets
+- **THEN** it asserts the copy set, the generated AGENTS paths, the `.opencode/skills` copies, and the
+  absence of kit-maintenance assets and OpenSpec files
 
 ### Requirement: Kit copy overwrites managed files
 
@@ -220,5 +220,5 @@ route.
 
 - **WHEN** the user opens `./demo` in OpenCode
 - **THEN** the Manna-owned `AGENTS.md` is loaded
-- **AND** the local skills, workflows, `opsx` commands, and Urbot sources are available
+- **AND** the local skills, workflows, and Urbot sources are available
 - **AND** the first real task is handled by the OpenCode session, not by `manna init`

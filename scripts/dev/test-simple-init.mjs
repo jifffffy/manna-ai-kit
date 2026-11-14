@@ -36,7 +36,7 @@ try {
   check(first.next.includes(workspace), "next must name the workspace to open");
   check(!("inspection" in first), "init must not return an inspection");
   check(first.kit.copied.includes("AGENTS.md"), "workspace AGENTS.md must be generated");
-  check(first.kit.copied.includes("openspec/config.yaml"), "openspec config must be copied");
+  check(!first.kit.copied.some((entry) => entry.startsWith("openspec/")), "openspec must not be copied");
   check(
     first.kit.copied.includes(".opencode/skills/urbot-router/SKILL.md"),
     "Manna skills must be copied into .opencode/skills"
@@ -135,9 +135,7 @@ console.log("OK: project init, clone/reuse, overwrite copy, one AGENTS.md, and r
 function assertWorkspace(workspace) {
   const required = [
     "AGENTS.md",
-    ".opencode/commands/opsx-propose.md",
     ".opencode/skills/urbot-router/SKILL.md",
-    ".opencode/skills/openspec-propose/SKILL.md",
     "skills/urbot-router/SKILL.md",
     "workflows/urbot-domain-design.md",
     "policies/tool-safety.md",
@@ -147,15 +145,22 @@ function assertWorkspace(workspace) {
     "skills.json",
     ".well-known/agent-skills/index.json",
     ".claude-plugin/plugin.json",
-    "openspec/config.yaml",
-    "openspec/specs/urbot-inspect-and-route/spec.md",
     "pom.xml"
   ];
   for (const relative of required) {
     check(fs.existsSync(path.join(workspace, relative)), `workspace missing ${relative}`);
   }
 
-  for (const relative of ["scripts/dev", "evals", "package.json", "skills.lock", "openspec/changes", "urbot"]) {
+  for (const relative of [
+    "scripts/dev",
+    "evals",
+    "package.json",
+    "skills.lock",
+    "openspec",
+    ".opencode/commands",
+    ".opencode/skills/openspec-propose",
+    "urbot"
+  ]) {
     check(!fs.existsSync(path.join(workspace, relative)), `workspace must not contain ${relative}`);
   }
 }
@@ -164,7 +169,8 @@ function assertEntryPoint(workspace) {
   const agents = fs.readFileSync(path.join(workspace, "AGENTS.md"), "utf8");
   check(agents.includes("Manna Workspace"), "AGENTS.md must be the Manna-owned entry point");
   check(agents.includes("skills/urbot-router"), "AGENTS.md must point at the local router");
-  check(agents.includes("openspec"), "AGENTS.md must name the OpenSpec root");
+  check(agents.includes("Manna workflows"), "AGENTS.md must name the Manna workflow");
+  check(!agents.includes("opsx"), "AGENTS.md must not reference the OpenSpec commands");
   check(!agents.includes("./urbot"), "AGENTS.md must not reference a nested checkout");
   check(!agents.includes("FIXTURE-AGENTS-SENTINEL"), "the Urbot AGENTS.md must be replaced");
   check(!fs.existsSync(path.join(workspace, "MANNA.md")), "there must be no second instruction file");
