@@ -10,6 +10,7 @@ import { routeRequest } from "../../generator/urbot/route.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const MODEL = path.join(ROOT, "evals/fixtures/urbot/domain-travel.json");
+const MUSIC_MODEL = path.join(ROOT, "evals/fixtures/urbot/domain-music.json");
 const PERSONA =
   "You are a professional and friendly travel assistant. You help users plan trips with clear, practical, and encouraging guidance.";
 const OBJECTIVE =
@@ -80,6 +81,8 @@ function testFixture(temp) {
   check(missing.status === "profile-required", "missing bot profile must route to profile");
   check(missing.route === "urbot-profile-change", "profile handoff must be urbot-profile-change");
 
+  assertMusicDomain(project, temp);
+  assertInvalidModels(project, temp);
   assertRouting();
   assertHandoff();
 }
@@ -145,8 +148,16 @@ function assertGenerated(project) {
 
   const trip = read(project, files[0]);
   check(trip.includes("extends NamedEntity"), "Trip must be a NamedEntity");
+  check(trip.includes("@CreationPermitted(true)"), "Trip must declare creation policy");
+  check(trip.includes('@JsonClassDescription("A planned journey")'), "Trip must carry its description");
+  check(trip.includes('@Relationship(name = "PLANNED_BY")'), "Trip.traveler must map PLANNED_BY");
   check(trip.includes("Traveler traveler()"), "Trip must reference Traveler");
+  check(trip.includes('@Relationship(name = "VISITS")'), "Trip.destinations must map VISITS");
   check(trip.includes("List<Destination> destinations()"), "Trip must reference Destinations");
+  check(
+    read(project, files[1]).includes('@JsonPropertyDescription("Name shown in the planner")'),
+    "Traveler attribute description missing"
+  );
   check(read(project, files[1]).includes("String displayName()"), "Traveler attribute missing");
   check(read(project, files[2]).includes("String country()"), "Destination attribute missing");
   check(read(project, files[3]).includes("record Itinerary(String notes)"), "Itinerary must be a record");
@@ -157,6 +168,141 @@ function assertGenerated(project) {
   check(vocabulary.includes('dataDictionaryFromPackages("com.embabel.bot.travel")'), "vocabulary test missing data dictionary");
   check(vocabulary.includes("com.embabel.bot.travel.domain.Trip") && vocabulary.includes("com.embabel.bot.travel.domain.Traveler") && vocabulary.includes("com.embabel.bot.travel.domain.Destination"), "vocabulary test missing entities");
   check(vocabulary.includes("isRecord()"), "vocabulary test missing record checks");
+}
+
+function assertMusicDomain(project, temp) {
+  applyProfile({
+    project,
+    name: "music",
+    persona: "You are a music reference assistant.",
+    objective: "Answer questions about composers and works.",
+    approve: true
+  });
+  const applied = applyDomainDesign({
+    project,
+    bot: "music",
+    model: MUSIC_MODEL,
+    approve: true
+  });
+  check(applied.status === "applied", "music domain should apply");
+  check(applied.dddModel.catalogEntities.includes("Genre"), "Genre must be a catalog entity");
+  check(applied.dddModel.catalogEntities.includes("Nationality"), "Nationality must be a catalog entity");
+
+  const composer = read(project, "src/main/java/com/embabel/bot/music/domain/Composer.java");
+  check(composer.includes("@CreationPermitted(false)"), "Composer must not permit creation");
+  check(composer.includes('@JsonClassDescription("A composer in the graph.")'), "Composer description missing");
+  check(composer.includes('@JsonPropertyDescription("Full name")'), "Composer attribute description missing");
+  check(composer.includes("@Nullable\n    Long birthYear();"), "Composer optional attribute must be nullable");
+  check(composer.includes('@Relationship(name = "INFLUENCED")'), "Composer self-relation missing");
+  check(
+    composer.includes('@Relationship(name = "INFLUENCED", direction = RelationshipDirection.INCOMING)'),
+    "Composer incoming direction missing"
+  );
+  check(composer.includes("List<Composer> influenced()"), "Composer self-relation type missing");
+  check(composer.includes('@Relationship(name = "HAS_NATIONALITY")'), "Composer nationality relation missing");
+
+  const work = read(project, "src/main/java/com/embabel/bot/music/domain/Work.java");
+  check((work.match(/@Relationship\(name = "SCORED_FOR"\)/g) ?? []).length === 2, "Work must have two SCORED_FOR getters");
+  check(work.includes('@Relationship(name = "FEATURES")'), "Work featured instruments missing");
+
+  const genre = read(project, "src/main/java/com/embabel/bot/music/domain/Genre.java");
+  check(genre.includes("public interface Genre extends NamedEntity"), "Genre must be an entity interface");
+  check(!genre.includes("record Genre"), "Genre must not be a record");
+
+  const performer = read(project, "src/main/java/com/embabel/bot/music/domain/Performer.java");
+  check(performer.includes("@CreationPermitted(true)"), "Performer must permit creation");
+
+  const modelFile = path.join(temp, "v1.json");
+  fs.writeFileSync(modelFile, JSON.stringify({ boundedContext: "Legacy", classes: [{ name: "Thing", color: "party-place-thing", dddVariant: "entity" }] }));
+  expectFailure(
+    () => applyDomainDesign({ project, bot: "travel", model: modelFile, approve: true }),
+    "schema version must be 2",
+    "a v1 model must be rejected"
+  );
+}
+
+function assertInvalidModels(project, temp) {
+  const base = (cls) => ({ schemaVersion: 2, boundedContext: "Invalid", classes: cls });
+
+  writeModel(temp, "value-object-relation.json", base([
+    {
+      name: "Thing",
+      color: "description",
+      dddVariant: "value-object",
+      attributes: [],
+      relationships: [{ method: "other", type: "HAS_OTHER", target: "Other", cardinality: "one" }]
+    },
+    { name: "Other", color: "party-place-thing", dddVariant: "entity", attributes: [], relationships: [] }
+  ]));
+  expectFailure(
+    () => applyDomainDesign({ project, bot: "travel", model: path.join(temp, "value-object-relation.json"), approve: true }),
+    "cannot declare relationships",
+    "a value object with a relationship must be rejected"
+  );
+
+  writeModel(temp, "duplicate-method.json", base([
+    {
+      name: "Thing",
+      color: "party-place-thing",
+      dddVariant: "entity",
+      attributes: [],
+      relationships: [
+        { method: "same", type: "A", target: "Other", cardinality: "one" },
+        { method: "same", type: "B", target: "Other", cardinality: "one" }
+      ]
+    },
+    { name: "Other", color: "party-place-thing", dddVariant: "entity", attributes: [], relationships: [] }
+  ]));
+  expectFailure(
+    () => applyDomainDesign({ project, bot: "travel", model: path.join(temp, "duplicate-method.json"), approve: true }),
+    "Duplicate relationship method",
+    "a duplicate relationship method must be rejected"
+  );
+
+  writeModel(temp, "invalid-direction.json", base([
+    {
+      name: "Thing",
+      color: "party-place-thing",
+      dddVariant: "entity",
+      attributes: [],
+      relationships: [{ method: "other", type: "HAS_OTHER", target: "Other", cardinality: "one", direction: "SIDEWAYS" }]
+    },
+    { name: "Other", color: "party-place-thing", dddVariant: "entity", attributes: [], relationships: [] }
+  ]));
+  expectFailure(
+    () => applyDomainDesign({ project, bot: "travel", model: path.join(temp, "invalid-direction.json"), approve: true }),
+    "Invalid direction",
+    "an invalid direction must be rejected"
+  );
+
+  writeModel(temp, "optional-many.json", base([
+    {
+      name: "Thing",
+      color: "party-place-thing",
+      dddVariant: "entity",
+      attributes: [],
+      relationships: [{ method: "others", type: "HAS_OTHER", target: "Other", cardinality: "many", optional: true }]
+    },
+    { name: "Other", color: "party-place-thing", dddVariant: "entity", attributes: [], relationships: [] }
+  ]));
+  expectFailure(
+    () => applyDomainDesign({ project, bot: "travel", model: path.join(temp, "optional-many.json"), approve: true }),
+    "Optional is only valid for a single relationship",
+    "an optional many relationship must be rejected"
+  );
+}
+
+function writeModel(temp, name, model) {
+  fs.writeFileSync(path.join(temp, name), JSON.stringify(model));
+}
+
+function expectFailure(action, fragment, message) {
+  try {
+    action();
+    errors.push(`${message}: no error raised`);
+  } catch (error) {
+    if (!String(error.message).includes(fragment)) errors.push(`${message}: ${error.message}`);
+  }
 }
 
 function assertProperties(project) {

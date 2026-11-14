@@ -9,7 +9,7 @@ Map the color model to DDD, then to Urbot's Java conventions.
 | Pink moment-interval | Aggregate root or entity | `NamedEntity` interface in the bot `domain/` package |
 | Yellow role | Role value object or entity | Record (no identity) or `NamedEntity` interface (identity) |
 | Green party/place/thing | Entity or aggregate root | `NamedEntity` interface |
-| Blue description | Value object or catalog entity | Record, or `NamedEntity` interface for a catalog |
+| Blue description | Value object or catalog entity | Record, or `NamedEntity` interface for `catalog-entity` |
 | Milled attribute | Value object | Record |
 | Event | Domain event | Record in `domain/events/` |
 | Cross-aggregate behavior | Domain service | Class in the bot package |
@@ -34,9 +34,14 @@ the object is replaceable.
 
 ## Urbot conventions
 
-- Aggregate roots/entities are `NamedEntity` interfaces under
+- Aggregate roots, entities, and catalog entities are `NamedEntity` interfaces under
   `src/main/java/com/embabel/bot/<bot>/domain/`.
 - Value objects and events are Java records.
+- Every relationship getter carries `@Relationship(name = "<TYPE>")`; the Java method name is independent.
+- Entities carry `@CreationPermitted`; catalog entities default to `false`.
+- Class descriptions become `@JsonClassDescription`; attribute descriptions become
+  `@JsonPropertyDescription`.
+- Optional attributes and single relations carry `@Nullable`.
 - Add `urbot.memory.entity-packages=com.embabel.bot.<bot>` to `application-<bot>.properties` so entity types
   enter the data dictionary.
 - Use `NamedEntityDataRepository` for persistence; never add a second repository or ORM layer.
@@ -46,9 +51,17 @@ the object is replaceable.
 ## Generated shape
 
 ```java
+@CreationPermitted(true)
+@JsonClassDescription("A planned journey")
 public interface Trip extends NamedEntity {
+
+    @JsonPropertyDescription("First travel day")
     LocalDate startDate();
+
+    @Relationship(name = "PLANNED_BY")
     Traveler traveler();
+
+    @Relationship(name = "VISITS")
     List<Destination> destinations();
 }
 ```
@@ -63,8 +76,21 @@ public record DateRange(LocalDate start, LocalDate end) {
 ```
 
 ```java
+@CreationPermitted(false)
+@JsonClassDescription("A musical genre.")
+public interface Genre extends NamedEntity {
+}
+```
+
+```java
 public record TripPlanned(String tripId, Instant occurredAt) {}
 ```
+
+## Model schema v2
+
+The model requires `schemaVersion: 2`. Relationships use `method` (Java), `type` (Neo4j), `target`,
+`cardinality`, optional `optional`, and optional `direction`. Attributes support `optional` and `description`;
+classes support `description` and `creationPermitted`. A v1 model is rejected with a migration message.
 
 ## Memory boundary
 

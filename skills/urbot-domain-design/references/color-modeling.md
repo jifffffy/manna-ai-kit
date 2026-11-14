@@ -36,9 +36,10 @@ A description, catalog entry, type, or template.
 
 - Questions: What describes or classifies another thing? Is it a reusable catalog or a value attached to one
   object?
-- Becomes a value object when it is attached to one object; becomes a catalog entity when it has its own
-  lifecycle.
-- Sample: `Itinerary`, `Preference`, `Policy`, `RoomType`.
+- Becomes a value object when it is attached to one object; becomes a `catalog-entity` when it has identity,
+  is referenced from many places, or is a reference node such as `Genre`, `Epoch`, `Nationality`, `Technique`,
+  `Instrument`, `Ensemble`, or `Family`.
+- Sample: `Itinerary`, `Preference`, `Policy`, `RoomType`, `Genre`, `Nationality`.
 
 ### Milled — attribute
 
@@ -62,10 +63,22 @@ A simple value carried by another object.
 ## Relationship notation
 
 ```text
-Trip 1 --- * Destination
-Trip 1 --- 1 Traveler
+Trip 1 --- * Destination      (VISITS)
+Trip 1 --- 1 Traveler         (PLANNED_BY)
 Trip 1 --- 1 DateRange
 ```
+
+For graph entities, record the Java method and the Neo4j relationship type separately:
+
+```json
+{ "method": "nationalities", "type": "HAS_NATIONALITY", "target": "Nationality", "cardinality": "many" }
+{ "method": "influenced", "type": "INFLUENCED", "target": "Composer", "cardinality": "many" }
+```
+
+- A self-relation is allowed (`Composer -> INFLUENCED -> Composer`).
+- The same target can have more than one relationship type (`SCORED_FOR` vs `FEATURES`).
+- A single relation can be optional; a many relation cannot.
+- Direction is `OUTGOING` (default), `INCOMING`, or `BOTH`.
 
 Use identifiers for cross-aggregate references. Keep a single aggregate's relationships as object references
 inside its boundary.
@@ -78,6 +91,7 @@ inside its boundary.
 | Traveler | Yellow role | The person planning the trip | Entity |
 | Destination | Green party/place/thing | A place to visit | Entity |
 | Itinerary | Blue description | The ordered plan for a trip | Value object |
+| Genre | Blue description | A reusable music catalog node | Catalog entity |
 | DateRange | Milled attribute | Inclusive travel dates | Value object |
 | TripPlanned | Event | A trip was planned | Domain event |
 
@@ -86,4 +100,6 @@ inside its boundary.
 - Two colors for one class: split the responsibilities or choose the dominant lifecycle.
 - A role with its own repository: it probably has identity and is an entity, not a value object.
 - A description with a lifecycle and many references: it is a catalog entity, not a value object.
+- A catalog generated as a record: it loses identity and graph persistence; use `catalog-entity`.
+- A relationship named after its Java method: the graph type must be explicit.
 - A moment-interval with no invariant: ask what must be true when it starts or ends.

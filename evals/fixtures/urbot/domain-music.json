@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 2,
+  "boundedContext": "Music Reference",
+  "ubiquitousLanguage": ["Composer", "Work", "Genre", "Epoch", "Nationality", "Technique", "Instrument", "Ensemble"],
+  "classes": [
+    {
+      "name": "Composer",
+      "color": "party-place-thing",
+      "dddVariant": "entity",
+      "creationPermitted": false,
+      "description": "A composer in the graph.",
+      "attributes": [
+        { "name": "completeName", "type": "String", "description": "Full name" },
+        { "name": "birthYear", "type": "Long", "optional": true },
+        { "name": "deathYear", "type": "Long", "optional": true }
+      ],
+      "relationships": [
+        { "method": "nationalities", "type": "HAS_NATIONALITY", "target": "Nationality", "cardinality": "many" },
+        { "method": "works", "type": "COMPOSED", "target": "Work", "cardinality": "many" },
+        { "method": "influenced", "type": "INFLUENCED", "target": "Composer", "cardinality": "many" },
+        { "method": "influencedBy", "type": "INFLUENCED", "target": "Composer", "cardinality": "many", "direction": "INCOMING" },
+        { "method": "epoch", "type": "OF_EPOCH", "target": "Epoch", "cardinality": "one" },
+        { "method": "techniques", "type": "USES", "target": "Technique", "cardinality": "many" }
+      ],
+      "invariants": []
+    },
+    {
+      "name": "Work",
+      "color": "party-place-thing",
+      "dddVariant": "entity",
+      "creationPermitted": false,
+      "description": "A musical work.",
+      "attributes": [
+        { "name": "title", "type": "String" },
+        { "name": "subtitle", "type": "String", "optional": true }
+      ],
+      "relationships": [
+        { "method": "genre", "type": "OF_GENRE", "target": "Genre", "cardinality": "one" },
+        { "method": "ensembles", "type": "SCORED_FOR", "target": "Ensemble", "cardinality": "many" },
+        { "method": "instruments", "type": "SCORED_FOR", "target": "Instrument", "cardinality": "many" },
+        { "method": "featuredInstruments", "type": "FEATURES", "target": "Instrument", "cardinality": "many" }
+      ],
+      "invariants": []
+    },
+    {
+      "name": "Nationality",
+      "color": "description",
+      "dddVariant": "catalog-entity",
+      "creationPermitted": false,
+      "description": "A nationality and its country.",
+      "attributes": [
+        { "name": "countryCode", "type": "String", "description": "ISO country code" },
+        { "name": "country", "type": "String" }
+      ],
+      "relationships": [],
+      "invariants": []
+    },
+    {
+      "name": "Genre",
+      "color": "description",
+      "dddVariant": "catalog-entity",
+      "creationPermitted": false,
+      "description": "A musical genre.",
+      "attributes": [],
+      "relationships": [],
+      "invariants": []
+    },
+    {
+      "name": "Epoch",
+      "color": "description",
+      "dddVariant": "catalog-entity",
+      "creationPermitted": false,
+      "description": "A musical epoch.",
+      "attributes": [],
+      "relationships": [],
+      "invariants": []
+    },
+    {
+      "name": "Technique",
+      "color": "description",
+      "dddVariant": "catalog-entity",
+      "creationPermitted": false,
+      "description": "A compositional technique.",
+      "attributes": [],
+      "relationships": [],
+      "invariants": []
+    },
+    {
+      "name": "Instrument",
+      "color": "description",
+      "dddVariant": "catalog-entity",
+      "creationPermitted": false,
+      "description": "A musical instrument.",
+      "attributes": [],
+      "relationships": [
+        { "method": "family", "type": "OF_FAMILY", "target": "Family", "cardinality": "one" }
+      ],
+      "invariants": []
+    },
+    {
+      "name": "Ensemble",
+      "color": "description",
+      "dddVariant": "catalog-entity",
+      "creationPermitted": false,
+      "description": "A musical ensemble.",
+      "attributes": [],
+      "relationships": [],
+      "invariants": []
+    },
+    {
+      "name": "Family",
+      "color": "description",
+      "dddVariant": "catalog-entity",
+      "creationPermitted": false,
+      "description": "An instrument family.",
+      "attributes": [],
+      "relationships": [],
+      "invariants": []
+    },
+    {
+      "name": "Performer",
+      "color": "party-place-thing",
+      "dddVariant": "entity",
+      "creationPermitted": true,
+      "description": "A performer such as a pianist or conductor.",
+      "attributes": [
+        { "name": "performerType", "type": "String", "optional": true }
+      ],
+      "relationships": [],
+      "invariants": []
+    }
+  ],
+  "events": [],
+  "services": []
+}

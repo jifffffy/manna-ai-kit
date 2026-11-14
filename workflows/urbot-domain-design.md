@@ -26,12 +26,14 @@ Capture responsibility, attributes, relationships, cardinalities, invariants, an
 
 - one bounded context per bot profile;
 - one root and one consistency boundary per aggregate;
-- entities/aggregate roots as `NamedEntity` interfaces under
+- entities, aggregate roots, and catalog entities as `NamedEntity` interfaces under
   `src/main/java/com/embabel/bot/<bot>/domain/`;
 - value objects and events as records;
 - domain services for cross-aggregate behavior;
 - repositories through Urbot's `NamedEntityDataRepository`, never a second persistence layer;
-- `urbot.memory.entity-packages=com.embabel.bot.<bot>` in `application-<bot>.properties`.
+- `urbot.memory.entity-packages=com.embabel.bot.<bot>` in `application-<bot>.properties`;
+- `@Relationship(name = "...")` on relationship getters, `@CreationPermitted` on entities,
+  `@JsonClassDescription`/`@JsonPropertyDescription` from the model, and `@Nullable` for optional values.
 
 See `skills/urbot-domain-design/references/ddd-mapping.md`.
 
@@ -63,7 +65,13 @@ See `skills/urbot-domain-design/references/ddd-mapping.md`.
 6. **Hand off** — if memory behavior is requested, stop and report `urbot-domain-memory` as the next separate
    workflow.
 
-## Sample model
+## Model schema v2
+
+The model requires `schemaVersion: 2`. Relationships split `method` (Java name) from `type` (Neo4j name) and
+support `optional` and `direction` (`OUTGOING`, `INCOMING`, `BOTH`). A blue description can be a `value-object`
+or a `catalog-entity`; catalog entities default to `@CreationPermitted(false)`.
+
+## Sample models
 
 `evals/fixtures/urbot/domain-travel.json` models a travel domain:
 
@@ -74,6 +82,13 @@ See `skills/urbot-domain-design/references/ddd-mapping.md`.
 - `DateRange` — milled attribute, value object;
 - `TripPlanned` — domain event;
 - `TripPlanningService` — cross-aggregate service.
+
+`evals/fixtures/urbot/domain-music.json` models a music reference domain:
+
+- `Composer` — entity with self `INFLUENCED`, `HAS_NATIONALITY`, `OF_EPOCH`, `USES`;
+- `Work` — entity with `SCORED_FOR` and `FEATURES`;
+- `Nationality`, `Genre`, `Epoch`, `Technique`, `Instrument`, `Ensemble`, `Family` — catalog entities;
+- `Performer` — creatable entity.
 
 ## Output
 

@@ -3,12 +3,13 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const COLORS = ["moment-interval", "role", "party-place-thing", "description", "milled"];
-const DDD_VARIANTS = ["aggregate-root", "entity", "value-object"];
+const DDD_VARIANTS = ["aggregate-root", "entity", "catalog-entity", "value-object"];
+const DIRECTIONS = ["OUTGOING", "INCOMING", "BOTH"];
 const COLOR_VARIANTS = {
   "moment-interval": ["aggregate-root", "entity"],
   role: ["entity", "value-object"],
   "party-place-thing": ["entity", "aggregate-root"],
-  description: ["value-object"],
+  description: ["value-object", "catalog-entity"],
   milled: ["value-object"]
 };
 const PRIMITIVES = new Set(["int", "long", "double", "float", "boolean", "short", "byte", "char"]);
@@ -144,21 +145,45 @@ function buildArtifacts({ project, bot, model }) {
 }
 
 function entityInterface({ bot, cls }) {
-  const imports = new Set(["com.embabel.agent.rag.model.NamedEntity"]);
+  const imports = new Set(["com.embabel.agent.rag.model.NamedEntity", "com.embabel.agent.core.CreationPermitted"]);
+  if (cls.description) imports.add("com.fasterxml.jackson.annotation.JsonClassDescription");
   const lines = [];
+
   for (const attribute of cls.attributes ?? []) {
     addImport(imports, attribute.type);
+    if (attribute.description) {
+      imports.add("com.fasterxml.jackson.annotation.JsonPropertyDescription");
+      lines.push(`    @JsonPropertyDescription(${javaString(attribute.description)})`);
+    }
+    if (attribute.optional) {
+      imports.add("org.jspecify.annotations.Nullable");
+      lines.push("    @Nullable");
+    }
     lines.push(`    ${attribute.type} ${camel(attribute.name)}();`);
   }
+
   for (const relationship of cls.relationships ?? []) {
-    if (relationship.cardinality === "many") {
-      imports.add("java.util.List");
-      lines.push(`    List<${relationship.target}> ${camel(relationship.name)}();`);
-    } else {
-      lines.push(`    ${relationship.target} ${camel(relationship.name)}();`);
-    }
+    imports.add("com.embabel.agent.rag.model.Relationship");
+    if (relationship.cardinality === "many") imports.add("java.util.List");
+    if (relationship.optional) imports.add("org.jspecify.annotations.Nullable");
+    const direction = relationship.direction ?? "OUTGOING";
+    if (direction !== "OUTGOING") imports.add("com.embabel.agent.rag.model.RelationshipDirection");
+    if (relationship.optional) lines.push("    @Nullable");
+    const annotation =
+      direction === "OUTGOING"
+        ? `@Relationship(name = "${relationship.type}")`
+        : `@Relationship(name = "${relationship.type}", direction = RelationshipDirection.${direction})`;
+    lines.push(`    ${annotation}`);
+    const type =
+      relationship.cardinality === "many" ? `List<${relationship.target}>` : relationship.target;
+    lines.push(`    ${type} ${relationship.method}();`);
   }
+
+  const annotations = [`@CreationPermitted(${creationPermitted(cls)})`];
+  if (cls.description) annotations.push(`@JsonClassDescription(${javaString(cls.description)})`);
+
   return `${packageAndImports(bot, "domain", imports)}
+${annotations.join("\n")}
 public interface ${cls.name} extends NamedEntity {
 ${lines.join("\n")}
 }
@@ -168,9 +193,15 @@ ${lines.join("\n")}
 function valueRecord({ bot, cls }) {
   const imports = new Set();
   for (const attribute of cls.attributes ?? []) addImport(imports, attribute.type);
-  const components = (cls.attributes ?? []).map((attribute) => `${attribute.type} ${camel(attribute.name)}`);
+  if ((cls.attributes ?? []).some((attribute) => attribute.optional)) {
+    imports.add("org.jspecify.annotations.Nullable");
+  }
+  const components = (cls.attributes ?? []).map(
+    (attribute) =>
+      `${attribute.optional ? "@Nullable " : ""}${attribute.type} ${camel(attribute.name)}`
+  );
   const checks = (cls.attributes ?? [])
-    .filter((attribute) => !PRIMITIVES.has(attribute.type))
+    .filter((attribute) => !attribute.optional && !PRIMITIVES.has(attribute.type))
     .map((attribute) => {
       const name = camel(attribute.name);
       return `        if (${name} == null) throw new IllegalArgumentException("${name} is required");`;
@@ -183,7 +214,6 @@ ${checks.join("\n")}
 }
 `;
 }
-
 function valueTest({ bot, cls }) {
   const fields = cls.attributes ?? [];
   const allReference = fields.length > 0 && fields.every((attribute) => !PRIMITIVES.has(attribute.type));
@@ -238,7 +268,12 @@ public class ${service.name} {
 
 function vocabularyTestClass({ bot, model }) {
   const entityNames = model.classes
-    .filter((cls) => cls.dddVariant === "entity" || cls.dddVariant === "aggregate-root")
+    .filter(
+      (cls) =>
+        cls.dddVariant === "entity" ||
+        cls.dddVariant === "aggregate-root" ||
+        cls.dddVariant === "catalog-entity"
+    )
     .map((cls) => cls.name);
   const valueObjects = model.classes.filter((cls) => cls.dddVariant === "value-object").map((cls) => cls.name);
   const events = (model.events ?? []).map((event) => event.name);
@@ -276,6 +311,14 @@ ${recordChecks}
     }
 }
 `;
+}
+
+function javaString(value) {
+  return `"${String(value)
+    .replaceAll("\\", "\\\\")
+    .replaceAll('"', '\\"')
+    .replaceAll("\n", "\\n")
+    .replaceAll("\r", "\\r")}"`;
 }
 
 function packageAndImports(bot, subpackage, imports) {
@@ -326,17 +369,24 @@ function readModel(file) {
 
 function validateModel(model) {
   if (!model || typeof model !== "object") throw new Error("Model must be an object.");
+  if (model.schemaVersion !== 2) {
+    throw new Error("Domain model schema version must be 2; migrate the model first.");
+  }
   if (!model.boundedContext) throw new Error("Model needs a boundedContext.");
   if (!Array.isArray(model.classes) || model.classes.length === 0) {
     throw new Error("Model needs at least one class.");
   }
+
   const names = new Set();
+  const byName = new Map();
   for (const cls of model.classes) {
     if (!cls.name || !/^[A-Z][A-Za-z0-9]*$/.test(cls.name)) {
       throw new Error(`Invalid class name: ${cls.name}`);
     }
     if (names.has(cls.name)) throw new Error(`Duplicate class name: ${cls.name}`);
     names.add(cls.name);
+    byName.set(cls.name, cls);
+
     if (!COLORS.includes(cls.color)) throw new Error(`Invalid color for ${cls.name}: ${cls.color}`);
     if (!DDD_VARIANTS.includes(cls.dddVariant)) {
       throw new Error(`Invalid DDD variant for ${cls.name}: ${cls.dddVariant}`);
@@ -344,25 +394,80 @@ function validateModel(model) {
     if (!COLOR_VARIANTS[cls.color].includes(cls.dddVariant)) {
       throw new Error(`Color ${cls.color} cannot be a ${cls.dddVariant} (${cls.name})`);
     }
+    if (cls.creationPermitted !== undefined && typeof cls.creationPermitted !== "boolean") {
+      throw new Error(`creationPermitted must be a boolean on ${cls.name}.`);
+    }
+    if (cls.creationPermitted !== undefined && cls.dddVariant === "value-object") {
+      throw new Error(`creationPermitted is only valid on graph entities, not ${cls.name}.`);
+    }
+    if (cls.description !== undefined && typeof cls.description !== "string") {
+      throw new Error(`description must be a string on ${cls.name}.`);
+    }
+
     cls.attributes = cls.attributes ?? [];
     cls.relationships = cls.relationships ?? [];
     cls.invariants = cls.invariants ?? [];
+
     for (const attribute of cls.attributes) {
       if (!attribute.name || !attribute.type) throw new Error(`Invalid attribute on ${cls.name}`);
-    }
-    for (const relationship of cls.relationships) {
-      if (!relationship.name || !relationship.target || !["one", "many"].includes(relationship.cardinality)) {
-        throw new Error(`Invalid relationship on ${cls.name}`);
+      if (attribute.optional !== undefined && typeof attribute.optional !== "boolean") {
+        throw new Error(`optional must be a boolean on ${cls.name}.${attribute.name}.`);
+      }
+      if (attribute.optional && PRIMITIVES.has(attribute.type)) {
+        throw new Error(`Optional attribute ${cls.name}.${attribute.name} cannot be a primitive.`);
+      }
+      if (attribute.description !== undefined && typeof attribute.description !== "string") {
+        throw new Error(`description must be a string on ${cls.name}.${attribute.name}.`);
       }
     }
+
+    const methods = new Set();
+    for (const relationship of cls.relationships) {
+      if (!relationship.method || !/^[a-z][A-Za-z0-9]*$/.test(relationship.method)) {
+        throw new Error(`Invalid relationship method on ${cls.name}: ${relationship.method}`);
+      }
+      if (methods.has(relationship.method)) {
+        throw new Error(`Duplicate relationship method ${cls.name}.${relationship.method}`);
+      }
+      methods.add(relationship.method);
+      if (!relationship.type || !/^[A-Z][A-Z0-9_]*$/.test(relationship.type)) {
+        throw new Error(`Invalid relationship type on ${cls.name}: ${relationship.type}`);
+      }
+      if (!relationship.target) throw new Error(`Relationship ${cls.name}.${relationship.method} needs a target`);
+      if (!["one", "many"].includes(relationship.cardinality)) {
+        throw new Error(`Invalid cardinality on ${cls.name}.${relationship.method}`);
+      }
+      if (relationship.optional !== undefined && typeof relationship.optional !== "boolean") {
+        throw new Error(`optional must be a boolean on ${cls.name}.${relationship.method}.`);
+      }
+      if (relationship.optional && relationship.cardinality === "many") {
+        throw new Error(`Optional is only valid for a single relationship (${cls.name}.${relationship.method}).`);
+      }
+      const direction = relationship.direction ?? "OUTGOING";
+      if (!DIRECTIONS.includes(direction)) {
+        throw new Error(`Invalid direction on ${cls.name}.${relationship.method}: ${direction}`);
+      }
+    }
+
+    if (cls.dddVariant === "value-object" && cls.relationships.length > 0) {
+      throw new Error(`Value object ${cls.name} cannot declare relationships.`);
+    }
   }
+
   for (const cls of model.classes) {
     for (const relationship of cls.relationships) {
-      if (!names.has(relationship.target)) {
-        throw new Error(`Relationship ${cls.name}.${relationship.name} targets unknown ${relationship.target}`);
+      const target = byName.get(relationship.target);
+      if (!target) {
+        throw new Error(`Relationship ${cls.name}.${relationship.method} targets unknown ${relationship.target}`);
+      }
+      if (target.dddVariant === "value-object") {
+        throw new Error(
+          `Relationship ${cls.name}.${relationship.method} targets value object ${relationship.target}; use an attribute instead.`
+        );
       }
     }
   }
+
   for (const event of model.events ?? []) {
     if (!event.name || !/^[A-Z][A-Za-z0-9]*$/.test(event.name)) throw new Error(`Invalid event ${event.name}`);
     event.fields = event.fields ?? [];
@@ -379,11 +484,17 @@ function colorModel(model) {
     name: cls.name,
     color: cls.color,
     dddVariant: cls.dddVariant,
+    creationPermitted: creationPermitted(cls),
     responsibility: cls.description,
     attributes: cls.attributes,
     relationships: cls.relationships,
     invariants: cls.invariants
   }));
+}
+
+function creationPermitted(cls) {
+  if (cls.creationPermitted !== undefined) return cls.creationPermitted;
+  return cls.dddVariant !== "catalog-entity";
 }
 
 function dddModel(model) {
@@ -393,6 +504,9 @@ function dddModel(model) {
     aggregates: model.classes.filter((cls) => cls.dddVariant === "aggregate-root").map((cls) => cls.name),
     entities: model.classes
       .filter((cls) => cls.dddVariant === "entity" || cls.dddVariant === "aggregate-root")
+      .map((cls) => cls.name),
+    catalogEntities: model.classes
+      .filter((cls) => cls.dddVariant === "catalog-entity")
       .map((cls) => cls.name),
     valueObjects: model.classes.filter((cls) => cls.dddVariant === "value-object").map((cls) => cls.name),
     events: (model.events ?? []).map((event) => event.name),

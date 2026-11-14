@@ -36,7 +36,7 @@ Use Java Modeling in Color to discover the domain:
 | Pink | Moment-interval | What happens over time? | Aggregate root or entity |
 | Yellow | Role | How does a party/place/thing participate? | Role value object, or entity with identity |
 | Green | Party/place/thing | Who or what is durable in the domain? | Entity or aggregate root |
-| Blue | Description | What describes or catalogs a thing? | Value object or catalog entity |
+| Blue | Description | What describes or catalogs a thing? | Value object, or `catalog-entity` when it has identity |
 | Milled | Attribute | What simple values are carried? | Value object/record |
 
 Every candidate gets exactly one color. Capture responsibility, attributes, relationships, cardinalities,
@@ -48,12 +48,45 @@ Map the color model to DDD:
 
 - one bounded context per bot profile;
 - one root and one consistency boundary per aggregate;
-- entities/aggregate roots as `NamedEntity` interfaces;
+- entities, aggregate roots, and catalog entities as `NamedEntity` interfaces;
 - value objects and domain events as records;
 - domain services for cross-aggregate behavior;
 - repositories through Urbot's `NamedEntityDataRepository`, never a second persistence layer.
 
+Record the graph relationship type separately from the Java method name. Generate `@Relationship(name = "...")`
+on relationship getters, `@CreationPermitted` on entities, Jackson descriptions from the model, and `@Nullable`
+for optional values.
+
 See `references/ddd-mapping.md`.
+
+## Model schema v2
+
+The generator accepts `schemaVersion: 2` and rejects older models with a migration message:
+
+```json
+{
+  "schemaVersion": 2,
+  "boundedContext": "Music Reference",
+  "classes": [
+    {
+      "name": "Composer",
+      "color": "party-place-thing",
+      "dddVariant": "entity",
+      "creationPermitted": false,
+      "description": "A composer in the graph.",
+      "attributes": [{ "name": "birthYear", "type": "Long", "optional": true }],
+      "relationships": [
+        { "method": "nationalities", "type": "HAS_NATIONALITY", "target": "Nationality", "cardinality": "many" },
+        { "method": "influenced", "type": "INFLUENCED", "target": "Composer", "cardinality": "many" }
+      ]
+    }
+  ]
+}
+```
+
+- `catalog-entity` is the variant for `Genre`, `Nationality`, `Epoch`, and similar reference nodes.
+- `creationPermitted` defaults to `true` for entities and `false` for catalog entities.
+- `direction` is `OUTGOING` (default), `INCOMING`, or `BOTH`.
 
 ## Process
 

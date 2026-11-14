@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 2,
   "boundedContext": "Travel Planning",
   "ubiquitousLanguage": ["Trip", "Traveler", "Destination", "Itinerary", "DateRange"],
   "classes": [
@@ -8,12 +9,12 @@
       "dddVariant": "aggregate-root",
       "description": "A planned journey",
       "attributes": [
-        { "name": "startDate", "type": "LocalDate" },
+        { "name": "startDate", "type": "LocalDate", "description": "First travel day" },
         { "name": "endDate", "type": "LocalDate" }
       ],
       "relationships": [
-        { "name": "traveler", "target": "Traveler", "cardinality": "one" },
-        { "name": "destinations", "target": "Destination", "cardinality": "many" }
+        { "method": "traveler", "type": "PLANNED_BY", "target": "Traveler", "cardinality": "one" },
+        { "method": "destinations", "type": "VISITS", "target": "Destination", "cardinality": "many" }
       ],
       "invariants": ["endDate must not be before startDate"]
     },
@@ -22,7 +23,7 @@
       "color": "role",
       "dddVariant": "entity",
       "description": "A person planning a trip",
-      "attributes": [{ "name": "displayName", "type": "String" }],
+      "attributes": [{ "name": "displayName", "type": "String", "description": "Name shown in the planner" }],
       "relationships": [],
       "invariants": []
     },
