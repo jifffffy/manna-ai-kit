@@ -22,13 +22,14 @@ It is **not**:
 
 - a second Spring Boot application,
 - a second domain model,
-- a project generator; the retired generator and all `manna-*` skills/workflows have been deleted (see
+- an unapproved code generator; bot-local Java is generated only through approved workflows, never a second
+  runtime or model. The retired generator and all `manna-*` skills/workflows are deleted (see
   [Asset disposition](#asset-disposition)).
 
 ```text
 User request
   → Intent router
-  → Urbot development flow (bootstrap / profile / prompt / tool / domain design / domain memory / verification)
+  → Urbot development flow (bootstrap / profile / prompt / tool / domain design / domain memory / data enhancement / verification)
   → Inspect authoritative Urbot source
   → Plan the smallest change
   → Apply inside the Urbot source tree
@@ -79,8 +80,8 @@ manna urbot inspect --repo https://github.com/jifffffy/urbot --ref <ref> --proje
 ```
 
 `urbot init` pins a shallow checkout and prints the resolved commit. `urbot inspect` reads the project and
-routes the request without modifying it. The profile, tool, and domain-design workflows are the write paths;
-they run separately after their checkpoints.
+routes the request without modifying it. The profile, tool, domain-design, and data-enhancement workflows are
+the write paths; they run separately after their checkpoints.
 
 ---
 
@@ -179,6 +180,62 @@ with `./mvnw -DskipTests compile` and `./mvnw test`. Domain changes route to `ur
 changes route to `urbot-domain-memory` as separate workflows.
 
 Examples: "增加天气查询工具", "接入 Stripe", "增加 MCP 工具", "添加一个 Subagent".
+
+---
+
+## Domain design workflow
+
+The domain workflow runs `urbot-discovery → urbot-domain-design → urbot-verification` and stops at
+`CHECKPOINT: DOMAIN` before writing. It discovers the domain with Java Modeling in Color, maps it to DDD, and
+generates the bot `domain/` package.
+
+The generator accepts domain-model schema v2:
+
+- entities, aggregate roots, and `catalog-entity` reference nodes become `NamedEntity` interfaces;
+- value objects and events are records;
+- relationships record the Java `method` separately from the Neo4j `type`, with optionality and direction;
+- generated code carries `@Relationship`, `@CreationPermitted`, `@JsonClassDescription`,
+  `@JsonPropertyDescription`, and `@Nullable` where the model asks for them.
+
+```bash
+node skills/urbot-domain-design/scripts/apply.mjs \
+  --project <urbot-checkout> --bot <bot> \
+  --model <domain-model.json> --approve
+```
+
+A v1 model is rejected with a migration message. `evals/fixtures/urbot/domain-music.json` shows the
+graph-native shape: self-relations, `SCORED_FOR`/`FEATURES`, catalog entities, and creation policy.
+
+---
+
+## Data enhancement workflow
+
+The data-enhancement workflow runs `urbot-discovery → urbot-data-enhance-pipeline → urbot-verification`. The
+pipeline is Java code in the bot package; Manna generates it, it does not run a Node-side pipeline.
+
+The generator reads the bot `domain/` package to resolve the source and target `NamedEntity` types, then writes:
+
+```text
+src/main/java/com/embabel/bot/<bot>/data/
+├── EnhancementBatch.java          # generate/apply lifecycle
+├── ReviewCsv.java                 # quoted CSV, duplicate keys, status counts
+├── EnhancementPipeline.java       # discovers batches, generate/apply
+├── <Batch>Enhancer.java           # pattern hook, pending CSV, approved-only apply
+└── DataEnhancementController.java # REST list/generate/apply
+```
+
+```bash
+node skills/urbot-data-enhance-pipeline/scripts/apply.mjs \
+  --project <urbot-checkout> --bot <bot> --name <batch> \
+  --source <Type> --target <Type> --relationship <REL> \
+  --match contains|none --approve
+```
+
+Generation writes `status=pending` rows and never writes the graph. A human reviews the CSV and commits, then
+apply writes only `approved` rows, skips existing relationships, and records `source` and `reviewedAt`. The
+optional validator is a pre-check; the generated Java apply is the enforcement point. REST endpoints are
+profile-scoped, disabled by default (`urbot.data-enhancement.enabled=false`), require `confirm=true` to apply,
+and expose no force or delete operation.
 
 ---
 
